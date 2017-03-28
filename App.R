@@ -149,9 +149,7 @@ ui <- fluidPage(tabsetPanel(
                                          ")),
                     plotOutput("graph3"),
                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                     tags$div("Loading...",id="loadmessage")),
-                    tags$h5("Hint: surprisingly, only one element of the environment trends strongly with ", tags$i("E. coli"), " levels. 
-                                         Can you think of a reason this element might cause higher ", tags$i("E. coli"), " levels?")
+                                     tags$div("Loading...",id="loadmessage"))
                     )
                     ),
            fluidRow(
@@ -178,7 +176,7 @@ ui <- fluidPage(tabsetPanel(
              ),
              column(4, offset=3, 
                     wellPanel(sliderInput("slider", label = h5("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
-                                          max = 2450, value = 235
+                                          max = 2415, value = 235
                     ))
              ),
              column(10, 
