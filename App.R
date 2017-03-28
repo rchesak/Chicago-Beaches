@@ -11,6 +11,8 @@
 
 library(shiny)
 library(ggplot2)
+library(gridExtra)
+library(plyr)
 
 #if running locally, uncomment the next line and paste in the path to this folder:
 #setwd("~/School/DePaul/3. Winter 2017/CSC 465/My Polished App")
@@ -18,21 +20,22 @@ source("30_ModelFunc.R")
 
 data16 = read.csv("data16.csv")
 
-#############################
-#create a dataframe containing the correct answers for the clusters: this graph is no longer needed
-#cluster = c("Cluster_1", "Cluster_2", "Cluster_3", "Cluster_4", "Cluster_5", "Cluster_6")
-#correct_beaches = c("12th", "31st", "39th", "57th","b", "a")
+linegraphdata = read.csv("linegraphdata.csv")
 
-#############################
-#list all possible beaches for the drop down menus:
+#list all possible options for the selection menus:
 beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "Howard", "Jarvis", "Juneway","Leone", "Montrose", "Ohio", "Osterman", "Rainbow", "Rogers", "South Shore", "39th")
+predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Intensity", "Wind_Speed",
+                       "Barometric_Pressure", "Visibility", "Cloud_Cover")
+
+
+
 
 # Define UI for application that draws graphs
 ui <- fluidPage(tabsetPanel(
   
   tabPanel("Home", 
            fluidRow(
-             column(12, offset=0,
+             column(8, offset=1,
                     tags$h1("Welcome!"),
                     tags$h4("This is an interactive site for understanding the ", tags$i("E. coli"), " levels at your beaches in Chicago.
                             Please vist the tabs above to access different interactive features.")
@@ -44,11 +47,8 @@ ui <- fluidPage(tabsetPanel(
                                            width = 624,
                                            src = "SmallerChicagoFlag.PNG")
                                           ),
-             column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
-                    tags$h5("The algorithm used in this app was built by some very bright folks working for
-                            the City of Chicago, including Callin Osborn and his team."),
-                    tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
-                    tags$h5("This Shiny app and all other graphs were built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+             column(12, offset=1, tags$h4("__________________________________________________________________________________________________"),
+                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("__________________________________________________________________________________________________")
                     )
@@ -72,7 +72,7 @@ ui <- fluidPage(tabsetPanel(
                         The beaches you select will be entered into an algorithm, which will then be used to 
                        create a predictive model. After you hit the Update button, give the algorithm ", tags$b("30 seconds"), " to run,
                         and your results will populate."),
-               tags$h5("In the graph below, you can see how well your model performed compared
+               tags$h5("After selecting beaches and hitting update, the graph that populates below will show you how well your model performed compared
                        to the model used by the City of Chicago."), 
                tags$head(tags$style(type="text/css", "
              #loadmessage {
@@ -107,12 +107,63 @@ ui <- fluidPage(tabsetPanel(
              column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
                     tags$h5("The algorithm used in this app was built by some very bright folks working for
                             the City of Chicago, including Callin Osborn and his team."),
-                    tags$h5("This Shiny app and all other graphs were built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("__________________________________________________________________________________________________")
                     )
                     )
   ),
+  
+  
+  
+  
+  
+  tabPanel("Predictors",
+           fluidRow(
+             column(12, offset=0, tags$h1("Pick a Predictor:")
+             ),
+             column(12, offset=0, tags$h4("Which elements of the environment trend with ", tags$i("E. coli"), " levels? Data scientists use 
+                                         elements that trend together to predict each other. Look for 
+                                          the predictor whose line graph peaks and valleys with the average", tags$i("E. coli"), "levels.")
+             ),
+             column(4, offset=3, 
+                    wellPanel(selectInput("predictor", "Select a Predictor", choices = predictor_options
+                                          )
+                              )
+             ),
+             column(10, 
+                    tags$head(tags$style(type="text/css", "
+                                         #loadmessage {
+                                         position: fixed;
+                                         top: 0px;
+                                         left: 0px;
+                                         width: 100%;
+                                         padding: 5px 0px 5px 0px;
+                                         text-align: center;
+                                         font-weight: bold;
+                                         font-size: 100%;
+                                         color: #000000;
+                                         background-color: #CCFF66;
+                                         z-index: 105;
+                                         }
+                                         ")),
+                    plotOutput("graph3"),
+                    conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                     tags$div("Loading...",id="loadmessage")),
+                    tags$h5("Hint: surprisingly, only one element of the environment trends strongly with ", tags$i("E. coli"), " levels. 
+                                         Can you think of a reason this element might cause higher ", tags$i("E. coli"), " levels?")
+                    )
+                    ),
+           fluidRow(
+             column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
+                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+                    #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
+                    tags$h4("__________________________________________________________________________________________________")
+             )
+           )
+           ),
+  
+  
   
   
   
@@ -153,7 +204,7 @@ ui <- fluidPage(tabsetPanel(
              ),
            fluidRow(
              column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
-                    tags$h5("This Shiny app and all other graphs were built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("__________________________________________________________________________________________________")
                     )
@@ -163,29 +214,61 @@ ui <- fluidPage(tabsetPanel(
   
   
   
+  
+  tabPanel("Map",
+           fluidRow(
+             column(12, offset=0, tags$h1("Which Beaches Behave Similarly?")
+             ),
+             column(12, offset=0,
+                    tags$h4("Below, you can see which beaches have", tags$i("E. coli"), "levels that fluctuate together. By understanding these
+                            relationships, data scientists can use only one beach out of a group to predict the ", tags$i("E. coli"), " levels at the other beaches
+                            in that group. This means that scientists only need to collect ", tags$i("E. coli"), " samples from one beach in the group, which can eliminate
+                            unnecessary spending."),
+                    column(12, offset=0,tags$img(height = 751,
+                                                 width = 882,
+                                                 src = "Map2.png")
+                    )
+                    )
+  ),
+  fluidRow(
+    column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
+           tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+           #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
+           tags$h4("__________________________________________________________________________________________________")
+    )
+  )
+),
+
+
+
+
     tabPanel("Network",
       fluidRow(
         column(12, offset=0, tags$h1("A Network of Beaches:")
                ),
-        column(12, offset=0,tags$img(height = 367,
-                                     width = 682,
-                                     src = "network.png")
-               ),
         column(12, offset=0,
-        tags$h4("Above, you can see which beaches have similar", tags$i("E. coli"), "levels. Each color represents a group that fluctuates together.
-                The thickness of each line represents the strength of the connection between the", tags$i("E. coli"), "levels at those 2 beaches.
-                The size of the circle represents the average", tags$i("E. coli"), "level at that beach.")
+               tags$h4("Below, you can see which beaches have similar", tags$i("E. coli"), "levels. The size of the circle represents the average", 
+                       tags$i("E. coli"), "level at that beach. Each color represents a group that fluctuates together.
+                       The thickness of each line represents the strength of the connection between the", tags$i("E. coli"), "levels at those 2 beaches.
+                       Understanding these relationships is a crucial part of predicting ", tags$i("E. coli"), " levels at each beach."),
+        column(12, offset=1,tags$img(height = 468,
+                                     width = 877,
+                                     src = "Network_Graph.png")
+               )
          )
       ),
       fluidRow(
         column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
                tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
-               tags$h5("This Shiny app and all other graphs were built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+               tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                tags$h4("__________________________________________________________________________________________________")
                )
       )
       )
+
+  
+  
   
   )
 )
@@ -202,7 +285,7 @@ server <- function(input, output,session) {
 
   ####################
   #graph 1:
-  observeEvent(input$go, {data <- c(input$chosen_beaches)
+  observeEvent(input$go, {
     model_summary <- beach_choose(beaches = as.character(input$chosen_beaches)) #calls thhe function given the input, and returns the output as model_summary
     hits = model_summary[235, 10]
     misses = model_summary[235, 11]
@@ -211,7 +294,6 @@ server <- function(input, output,session) {
     accuracy = ((hits + correct_rejections) / (hits + misses + correct_rejections + false_alarms)) *100
     accuracy <- as.integer(accuracy)
     accuracy <- round(accuracy, 0)
-    #accuracy <- as.character(accuracy)
   
     USGS_hits = model_summary[235, 14]
     USGS_misses = model_summary[235, 15]
@@ -220,8 +302,6 @@ server <- function(input, output,session) {
     USGS_accuracy = ((USGS_hits + USGS_correct_rejections) / (USGS_hits + USGS_misses + USGS_correct_rejections + USGS_false_alarms)) *100
     USGS_accuracy <- as.integer(USGS_accuracy)
     USGS_accuracy <- round(USGS_accuracy, 0)
-    #USGS_accuracy <- as.character(USGS_accuracy)
-
     
     Model <- c("Your Model", "Your Model", "Your Model", "Your Model", "USGS Model","USGS Model","USGS Model","USGS Model")
     result <- c("Hits", "Misses", "False_Alarms", "Correct_Rejections", "Hits", "Misses", "False_Alarms", "Correct_Rejections")
@@ -259,16 +339,33 @@ server <- function(input, output,session) {
   #reorder the columns of the graph based on number of unsafe days:
   data16$Client.ID <- reorder(data16$Client.ID, data16$overthresh, FUN=sum)
   
-  output$graph2 <- renderPlot({ggplot(data16, aes(x=Client.ID, y=days, fill=underthresh)) + geom_bar(stat = "identity")+
+  #do a group-wise transform, splitting on "Client.ID" (this allows us to create a proportional bar graph)
+  newdata <- ddply(data16, "Client.ID", transform, 
+                   percent_days = days / sum(days) * 100)
+  
+  output$graph2 <- renderPlot({ggplot(newdata, aes(x=Client.ID, y=percent_days, fill=underthresh)) + geom_bar(stat = "identity")+
     theme_bw() + 
     theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15)) +
     theme(axis.text.y = element_text(size=15)) +
     ggtitle("Swimmable Beach Days in 2016") +
     theme(plot.title=element_text(size=20)) +
-    labs(y="Number of \nBeach Days", x=NULL, fill = "Swimmable?") +
+    labs(y="Percent of \nBeach Days", x=NULL, fill = "Swimmable?") +
     theme(axis.title.y=element_text(size=15)) +
     scale_fill_brewer(labels = c("No", "Yes"), palette="Paired")
        })
+  })
+  
+  ###########
+  #graph 3:
+  observeEvent(input$predictor, {
+    plot1 <- ggplot(data= linegraphdata, aes(x=Year, y=E_coli)) + geom_line() + theme_bw() +
+      theme(axis.title=element_text(size=15), axis.text=element_text(size=13))
+    
+    #note: aes_string allows R to tie the input back to the linegraphdata data frame. Have to put Year in quotes when you use aes_string though
+    plot2 <- ggplot(data = linegraphdata, aes_string(x="Year", y=input$predictor)) + geom_line() + theme_bw() +
+      theme(axis.title=element_text(size=15), axis.text=element_text(size=13))
+    
+    output$graph3 <- renderPlot({grid.arrange(plot1, plot2, ncol=1)})
   })
 
 }
