@@ -67,8 +67,19 @@ content5 <- paste(sep = "",
                   
 )
 
+content6 <- paste0("<strong>Beach: </strong>", 
+                   lng_lat_df$Client.ID, 
+                   "<br><strong>Avg E. coli level: </strong>", 
+                   lng_lat_df$AvgEcoliLabel
+)
 
-
+content7 <- paste0("<strong>Beach: </strong>", 
+                   lng_lat_df$Client.ID, 
+                   "<br><strong>Unsafe beach days you caught: </strong>", 
+                   "_____",
+                   "<br><strong>Unsafe beach days you missed: </strong>", 
+                   "____"
+)
 
 # Define UI for application that draws graphs
 ui <- fluidPage(tabsetPanel(
@@ -343,9 +354,10 @@ server <- function(input, output,session) {
         ~Longitude, ~Latitude,
         radius = ~AvgEcoli*3,
         color = ~factpal(Group),
-        label = content2,
+        #label = content2,
         #label = ~as.character(AvgEcoli),
-        #popup = content2,
+        label = "Click me!",
+        popup = content7,
         weight = 5
       ) 
     # addPopups(
@@ -473,9 +485,10 @@ server <- function(input, output,session) {
       ~Longitude, ~Latitude,
       radius = ~AvgEcoli*3,
       color = ~factpal(Group),
-      label = content5,
+      #label = content6,
       #label = ~as.character(AvgEcoli),
-      #popup = content2,
+      label = "Click me!",
+      popup = content6,
       weight = 5
     ) 
   # addPopups(
