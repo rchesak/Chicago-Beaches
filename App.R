@@ -15,8 +15,6 @@ library(gridExtra)
 library(plyr)
 library(leaflet)
 
-#if running locally, uncomment the next line and paste in the path to this folder:
-#setwd("~/School/DePaul/3. Winter 2017/CSC 465/My Polished App")
 source("30_ModelFunc.R")
 
 #import datasets needed:
