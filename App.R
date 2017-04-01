@@ -13,19 +13,61 @@ library(shiny)
 library(ggplot2)
 library(gridExtra)
 library(plyr)
+library(leaflet)
 
 #if running locally, uncomment the next line and paste in the path to this folder:
 #setwd("~/School/DePaul/3. Winter 2017/CSC 465/My Polished App")
 source("30_ModelFunc.R")
 
+#import datasets needed:
 data16 = read.csv("data16.csv")
-
 linegraphdata = read.csv("linegraphdata.csv")
+lng_lat_df = read.csv("mapdata.csv")
 
 #list all possible options for the selection menus:
 beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "Howard", "Jarvis", "Juneway","Leone", "Montrose", "Ohio", "Osterman", "Rainbow", "Rogers", "South Shore", "39th")
 predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Intensity", "Wind_Speed",
                        "Barometric_Pressure", "Visibility", "Cloud_Cover")
+
+
+
+# Create a palette that maps factor levels to colors for the interactive map:
+pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+factpal <- colorFactor(c("blue", "red", "green", "purple", "orange", "maroon3" ), lng_lat_df$Group)
+
+#Create label content for interactive map:
+# content <- paste(sep = "<br/>",
+#                  lng_lat_df$Client.ID,
+#                  "beach. Some stat goes here!"
+# )
+
+content2 <- paste(sep = "",
+                  lng_lat_df$Client.ID,
+                  ": You caught ",
+                  "___",
+                  " unsafe beach days, and you missed",
+                  "____",
+                  " unsafe beach days."
+                  
+                  
+)
+
+# content3 <- cat(sep = "\n",
+#                 lng_lat_df$Client.ID,
+#                 "\nSome stat goes here"
+# )
+# content4 <- print(sep = "\n",
+#                   lng_lat_df$Client.ID,
+#                   "Some stat goes here"
+# )
+
+content5 <- paste(sep = "",
+                  lng_lat_df$Client.ID,
+                  " || ",
+                  lng_lat_df$AvgEcoliLabel
+                  
+                  
+)
 
 
 
@@ -89,8 +131,13 @@ ui <- fluidPage(tabsetPanel(
                                     z-index: 105;
                                     }
                                     ")),
-               verbatimTextOutput("yaccuracy"), 
-               verbatimTextOutput("oaccuracy"),
+               # verbatimTextOutput("yaccuracy"), 
+               # verbatimTextOutput("oaccuracy"),
+           wellPanel(sliderInput("slider2", label = h5("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
+                                 max = 500, value = 235
+                                 )
+           ),    
+           leafletOutput('mymap'),
                plotOutput("graph1"),
                conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                 tags$div("Loading...",id="loadmessage")),
@@ -222,10 +269,9 @@ ui <- fluidPage(tabsetPanel(
                             relationships, data scientists can use only one beach out of a group to predict the ", tags$i("E. coli"), " levels at the other beaches
                             in that group. This means that scientists only need to collect ", tags$i("E. coli"), " samples from one beach in the group, which can eliminate
                             unnecessary spending."),
-                    column(12, offset=0,tags$img(height = 751,
-                                                 width = 882,
-                                                 src = "Map2.png")
-                    )
+                    tags$h4("The size of the circle represents the average ", tags$i("E. coli"), " level at that beach, and the colors represent groups that fluctuate together."),
+                    column(12, offset=0, leafletOutput('mymap2')
+                          )
                     )
   ),
   fluidRow(
@@ -282,24 +328,70 @@ ui <- fluidPage(tabsetPanel(
 server <- function(input, output,session) {
 
   ####################
-  #graph 1:
+  #graph 1 and interactive map:
   observeEvent(input$go, {
-    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches)) #calls thhe function given the input, and returns the output as model_summary
-    hits = model_summary[235, 10]
-    misses = model_summary[235, 11]
-    correct_rejections = model_summary[235, 12]
-    false_alarms = model_summary[235, 13]
-    accuracy = ((hits + correct_rejections) / (hits + misses + correct_rejections + false_alarms)) *100
-    accuracy <- as.integer(accuracy)
-    accuracy <- round(accuracy, 0)
-  
-    USGS_hits = model_summary[235, 14]
-    USGS_misses = model_summary[235, 15]
-    USGS_correct_rejections = model_summary[235, 16]
-    USGS_false_alarms = model_summary[235, 17]
-    USGS_accuracy = ((USGS_hits + USGS_correct_rejections) / (USGS_hits + USGS_misses + USGS_correct_rejections + USGS_false_alarms)) *100
-    USGS_accuracy <- as.integer(USGS_accuracy)
-    USGS_accuracy <- round(USGS_accuracy, 0)
+    #map:
+    # Plot a default web map 
+    map <- leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
+    #customize your map:
+    map2 <- map %>%
+      #use a third-party tile that looks better:
+      #addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
+      addProviderTiles(providers$Esri.WorldTopoMap) %>%
+      # map location:
+      setView(lng=-87.6, lat = 41.85, zoom = 10) %>%                        
+      # add some circles:
+      addCircles(
+        ~Longitude, ~Latitude,
+        radius = ~AvgEcoli*3,
+        color = ~factpal(Group),
+        label = content2,
+        #label = ~as.character(AvgEcoli),
+        #popup = content2,
+        weight = 5
+      ) 
+    # addPopups(
+    #   ~Longitude, ~Latitude,
+    #   content,
+    #   options = popupOptions(closeButton = TRUE)
+    # )
+    
+    output$mymap = renderLeaflet(map2)
+    
+   
+    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches)) #calls the function given the input, and returns the output as model_summary
+    
+    
+    #graph:
+    
+    hits = model_summary[input$slider2, 10]
+    misses = model_summary[input$slider2, 11]
+    correct_rejections = model_summary[input$slider2, 12]
+    false_alarms = model_summary[input$slider2, 13]
+    
+    USGS_hits = model_summary[input$slider2, 14]
+    USGS_misses = model_summary[input$slider2, 15]
+    USGS_correct_rejections = model_summary[input$slider2, 16]
+    USGS_false_alarms = model_summary[input$slider2, 17]
+    
+    #______________________________________________
+    
+    # hits = model_summary[235, 10]
+    # misses = model_summary[235, 11]
+    # correct_rejections = model_summary[235, 12]
+    # false_alarms = model_summary[235, 13]
+    # 
+    # USGS_hits = model_summary[235, 14]
+    # USGS_misses = model_summary[235, 15]
+    # USGS_correct_rejections = model_summary[235, 16]
+    # USGS_false_alarms = model_summary[235, 17]
+    
+    # accuracy = ((hits + correct_rejections) / (hits + misses + correct_rejections + false_alarms)) *100
+    # accuracy <- as.integer(accuracy)
+    # accuracy <- round(accuracy, 0)
+    # USGS_accuracy = ((USGS_hits + USGS_correct_rejections) / (USGS_hits + USGS_misses + USGS_correct_rejections + USGS_false_alarms)) *100
+    # USGS_accuracy <- as.integer(USGS_accuracy)
+    # USGS_accuracy <- round(USGS_accuracy, 0)
     
     Model <- c("Your Model", "Your Model", "Your Model", "Your Model", "USGS Model","USGS Model","USGS Model","USGS Model")
     result <- c("Hits", "Misses", "False_Alarms", "Correct_Rejections", "Hits", "Misses", "False_Alarms", "Correct_Rejections")
@@ -311,13 +403,14 @@ server <- function(input, output,session) {
       theme_bw() + 
       theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15)) +
       theme(axis.text.y = element_text(size=15)) +
+        
       ggtitle("Your Results vs. USGS Results") +
       theme(plot.title=element_text(size=20)) +
       labs(y=NULL, x=NULL) +
       scale_fill_brewer(palette="Paired")
       })
-    output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
-    output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
+    # output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
+    # output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
 
   })
   ##################
@@ -365,6 +458,35 @@ server <- function(input, output,session) {
     
     output$graph3 <- renderPlot({grid.arrange(plot1, plot2, ncol=1)})
   })
+  
+  ###########
+  #map 2:
+  # Plot a default web map 
+  mapA <- leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
+  #customize your map:
+  mapB <- mapA %>%
+    #use a third-party tile that looks better:
+    #addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
+    addProviderTiles(providers$Esri.WorldTopoMap) %>%
+    # map location:
+    setView(lng=-87.6, lat = 41.85, zoom = 10) %>%                        
+    # add some circles:
+    addCircles(
+      ~Longitude, ~Latitude,
+      radius = ~AvgEcoli*3,
+      color = ~factpal(Group),
+      label = content5,
+      #label = ~as.character(AvgEcoli),
+      #popup = content2,
+      weight = 5
+    ) 
+  # addPopups(
+  #   ~Longitude, ~Latitude,
+  #   content,
+  #   options = popupOptions(closeButton = TRUE)
+  # )
+  
+  output$mymap2 = renderLeaflet(mapB)
 
 }
 
