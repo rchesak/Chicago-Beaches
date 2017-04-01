@@ -1,14 +1,14 @@
 To do
 
 Renel:
-1.	Record what people’s responses are for the algorithm
+1.	Look more professional 
 2.	DONE Replace accuracy with a simple measure for the prediction outcomes
 3.	DONE Add threshold slider that updates instantly (how instantly?)
   a.	not tied to update button? ********Callin, what were we thinking on this one? *************
 4.	Tie prediction outcomes to map (BIG)
   a.	I need predictions for each individual beach as output to tie it to the map 
 5.	DONE Upload all my files
-6.	Look more professional
+6.	Record what people’s responses are for the algorithm
 7.	DONE Get a license fdile (see tldrlegal.com)
   a.	Mit
   b.	Apache
