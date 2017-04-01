@@ -14,6 +14,7 @@ library(ggplot2)
 library(gridExtra)
 library(plyr)
 library(leaflet)
+library(shinythemes)
 
 source("30_ModelFunc.R")
 
@@ -82,7 +83,11 @@ content7 <- paste0("<strong>Beach: </strong>",
 )
 
 # Define UI for application that draws graphs
-ui <- fluidPage(tabsetPanel(
+ui <- fluidPage(
+  #to test out themes, uncomment next line and comment out the line below it.
+  #shinythemes::themeSelector(), 
+  theme = shinytheme("yeti"),
+  tabsetPanel(
   
   tabPanel("Home", 
            fluidRow(
