@@ -23,3 +23,4 @@ Callin:
 5.	Make the algorithm run much faster (maybe 5 seconds tops)
 6.	We need to tie the slider input to the algorithm? Right now, I think it is permanently set at 235. The only thing the slider 
     currently changes is which tp, fn, tn, fp are selected from the model summary. Is this what they want? 
+7. Make sure the verbage in each tab is accurate.
