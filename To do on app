@@ -16,11 +16,10 @@ Renel:
 8.	Find out more about user group presentation
 
 Callin:
-1.	Send Renel a .csv file of the “model summary” output (too hard for me to create it myself)
-2.	I need predictions for each individual beach as output to tie it to the map 
-3.	I need to know how to color the clusters on the map – how is this algorithm using the beach input?
-4.	The North Avenue and Oak Street beaches to be fixed in the algorithm code so they can be added back to the beach checklist
-5.	Make the algorithm run much faster (maybe 5 seconds tops)
-6.	We need to tie the slider input to the algorithm? Right now, I think it is permanently set at 235. The only thing the slider 
+1.	I need predictions for each individual beach as output to tie it to the map 
+2.	I need to know how to color the clusters on the map – how is this algorithm using the beach input?
+3.	The North Avenue and Oak Street beaches to be fixed in the algorithm code so they can be added back to the beach checklist
+4.	Make the algorithm run much faster (maybe 5 seconds tops)
+5.	We need to tie the slider input to the algorithm? Right now, I think it is permanently set at 235. The only thing the slider 
     currently changes is which tp, fn, tn, fp are selected from the model summary. Is this what they want? 
-7. Make sure the verbage in each tab is accurate.
+6. Make sure the verbage in each tab is accurate.
