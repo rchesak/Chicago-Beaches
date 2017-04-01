@@ -147,22 +147,31 @@ ui <- fluidPage(
                                     ")),
                # verbatimTextOutput("yaccuracy"), 
                # verbatimTextOutput("oaccuracy"),
-           wellPanel(sliderInput("slider2", label = h5("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
-                                 max = 500, value = 235
-                                 )
-           ),    
+           ###########################################################
+           absolutePanel(
+             bottom = -350, right = -350, width = 350,
+             draggable = TRUE,
+             wellPanel(
+               sliderInput("slider2", label = h6("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
+                           max = 500, value = 235
+               ),
+               checkboxGroupInput("chosen_beaches", "Select which beaches will be predictive:", beach_options),
+               actionButton(inputId = "go", label = "Update (~30 sec)"),
+               tags$h5("Model Results:"),
+               plotOutput("graph1")
+               ),
+             style = "opacity: 0.92"
+               ),
+           ##########################################################
+   
            leafletOutput('mymap'),
-               plotOutput("graph1"),
                conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                 tags$div("Loading...",id="loadmessage")),
                tags$h6("Hits: Unsafe beach days caught by the model."), 
                tags$h6("Misses: Unsafe beach days not caught by the model."), 
                tags$h6("False Alarms: Safe beach days incorrectly flagged as unsafe, based upon the model."), 
                tags$h6("Correct Rejections: Safe beach days correctly flagged as safe, based upon the model.")
-            ),
-             column(3, wellPanel(checkboxGroupInput("chosen_beaches", "Select which beaches will be predictive:", beach_options),
-                           actionButton(inputId = "go", label = "Update (~30 sec)"))
-                     )
+            )
            ),
           fluidRow(
              column(12, offset=0, tags$h4("__________________________________________________________________________________________________"),
@@ -236,8 +245,8 @@ ui <- fluidPage(
                                           how many swimmable beach days there are at different cutoff levels.")
              ),
              column(4, offset=3, 
-                    wellPanel(sliderInput("slider", label = h5("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
-                                          max = 2415, value = 235
+                    wellPanel(sliderInput("slider", label = h5("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = min(data16$Escherichia.coli), 
+                                          max = 2419, value = 235
                     ))
              ),
              column(10, 
@@ -279,11 +288,11 @@ ui <- fluidPage(
              column(12, offset=0, tags$h1("Which Beaches Behave Similarly?")
              ),
              column(12, offset=0,
-                    tags$h4("Below, you can see which beaches have", tags$i("E. coli"), "levels that fluctuate together. By understanding these
+                    tags$h4("Below, you can see which beaches have", tags$i("E. coli"), "levels that fluctuate together (via circle color). By understanding these
                             relationships, data scientists can use only one beach out of a group to predict the ", tags$i("E. coli"), " levels at the other beaches
                             in that group. This means that scientists only need to collect ", tags$i("E. coli"), " samples from one beach in the group, which can eliminate
                             unnecessary spending."),
-                    tags$h4("The size of the circle represents the average ", tags$i("E. coli"), " level at that beach, and the colors represent groups that fluctuate together."),
+                    tags$h4("The size of the circle represents the average ", tags$i("E. coli"), " level at that beach."),
                     column(12, offset=0, leafletOutput('mymap2')
                           )
                     )
@@ -377,7 +386,7 @@ server <- function(input, output,session) {
     model_summary <- beach_choose(beaches = as.character(input$chosen_beaches)) #calls the function given the input, and returns the output as model_summary
     
     
-    #graph:
+    #bar graph for algorithm results:
     
     hits = model_summary[input$slider2, 10]
     misses = model_summary[input$slider2, 11]
@@ -419,7 +428,7 @@ server <- function(input, output,session) {
       theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15)) +
       theme(axis.text.y = element_text(size=15)) +
         
-      ggtitle("Your Results vs. USGS Results") +
+      #ggtitle("Model Results") +
       theme(plot.title=element_text(size=20)) +
       labs(y=NULL, x=NULL) +
       scale_fill_brewer(palette="Paired")
@@ -429,7 +438,7 @@ server <- function(input, output,session) {
 
   })
   ##################
-  #graph 2:
+  #graph 2 (stacked bar graph):
   observeEvent(input$slider, {
   for (i in data16$Escherichia.coli) {
     overthresh = ifelse(data16$Escherichia.coli > input$slider, 1, 0)}
@@ -462,7 +471,7 @@ server <- function(input, output,session) {
   })
   
   ###########
-  #graph 3:
+  #graph 3 (line graphs):
   observeEvent(input$predictor, {
     plot1 <- ggplot(data= linegraphdata, aes(x=Year, y=E_coli)) + geom_line() + theme_bw() +
       theme(axis.title=element_text(size=15), axis.text=element_text(size=13))
@@ -475,7 +484,7 @@ server <- function(input, output,session) {
   })
   
   ###########
-  #map 2:
+  #map 2 (for map tab):
   # Plot a default web map 
   mapA <- leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
   #customize your map:
