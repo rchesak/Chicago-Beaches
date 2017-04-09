@@ -7,16 +7,15 @@ model_cols <- (ncol(df_model))
 
 
 if (kFolds) {
-  print("Modeling with 10 folds validation")
+  cat("Modeling with",num_of_folds,"fold validation\n")
   df_model <- df_model[complete.cases(df_model),] #remove NAs from df_model
-  set.seed(111)
   dates <- unique(df_model$Date)
-  fold_size <- (1/10) * length(dates)
+  fold_size <- (1/num_of_folds) * length(dates)
   dates_sample <- sample(dates, fold_size)
   used_dates <- c()
   plot_data <- data.frame()
   predictions <- data.frame()
-  for (fold in c(1:10)) {
+  for (fold in c(1:num_of_folds)) {
     print(paste0("Cross-validating fold # ", fold))
     testDays <- dates_sample
     testData <- df_model[df_model$Date %in% testDays, ]
@@ -57,7 +56,7 @@ if (kFolds) {
     predictions <- rbind(predictions, model$predictions)
     used_dates <- c(used_dates, dates_sample)
     remaining_dates <- dates[!dates %in% used_dates]
-    if (fold < 10) dates_sample <- sample(remaining_dates, fold_size)
+    if (fold < num_of_folds) dates_sample <- sample(remaining_dates, fold_size)
   }
   names(predictions)[names(predictions) == "Predicted.Level"] <- "USGS.Prediction"
   names(predictions)[names(predictions) == "predictionRF"] <- "DNAModel.Prediction"

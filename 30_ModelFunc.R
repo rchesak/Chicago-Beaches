@@ -1,4 +1,4 @@
-beach_choose <- function(beaches){ 
+beach_choose <- function(beaches,thresh,num_of_folds){ 
 
   source("00_startup.R",local=TRUE)
   
@@ -76,7 +76,7 @@ df_model <- df[, unlist(list(c("Escherichia.coli","Client.ID"),beaches_rename,
   threshEnd <- 500
   
   # change threshold for saving results into "predictions" data frame
-  thresh <- 235
+  thresh <- thresh
   
   # runs all modeling code
   source("30_model.R", print.eval=TRUE, local = TRUE)

@@ -446,7 +446,7 @@ server <- function(input, output,session) {
     output$mymap = renderLeaflet(map2)
     
    
-    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches)) #calls the function given the input, and returns the output as model_summary
+    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(input$slider2),num_of_folds = 3) #calls the function given the input, and returns the output as model_summary
     
     
     #bar graph for algorithm results:
