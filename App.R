@@ -24,7 +24,7 @@ linegraphdata = read.csv("linegraphdata.csv")
 lng_lat_df = read.csv("mapdata.csv")
 
 #list all possible options for the selection menus:
-beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "Howard", "Jarvis", "Juneway","Leone", "Montrose", "Ohio", "Osterman", "Rainbow", "Rogers", "South Shore", "39th")
+beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "Howard", "Jarvis", "Juneway","Leone", "Montrose","North Avenue", "Oak Street", "Ohio", "Osterman", "Rainbow", "Rogers", "South Shore", "39th")
 predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Intensity", "Wind_Speed",
                        "Barometric_Pressure", "Visibility", "Cloud_Cover")
 
