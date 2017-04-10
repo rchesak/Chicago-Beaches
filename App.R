@@ -159,12 +159,18 @@ ui <- fluidPage(
              column(6, offset=0, leafletOutput('mymap2', width = 1700, height = 700)
              ),
              column(4,
-                    tags$h5("Each beach is represented on the map as a circle, and they are color-coded to show which beaches have ", tags$i("E. coli"), " 
+                    absolutePanel(
+                      bottom = -500, right = 900, width = 350,
+                      draggable = TRUE,
+                      wellPanel(tags$h4("Draggable Box"),
+                      tags$h5("Each beach is represented on the map as a circle, and they are color-coded to show which beaches have ", tags$i("E. coli"), " 
                          levels that fluctuate together. The size of the circle represents the average ", tags$i("E. coli"), " level at that beach."),
-                    tags$h5("By understanding these
-                            relationships, data scientists can use only one beach out of a group to predict the ", tags$i("E. coli"), " levels at the other beaches
-                            in that group. This means that scientists only need to collect ", tags$i("E. coli"), " samples from one beach in the group, which can eliminate
-                            unnecessary spending.")
+                      tags$h5("By understanding these
+                              relationships, data scientists can use only one beach out of a group to predict the ", tags$i("E. coli"), " levels at the other beaches
+                              in that group. This means that scientists only need to collect ", tags$i("E. coli"), " samples from one beach in the group, which can eliminate
+                              unnecessary spending.")),
+                      style = "opacity: 0.92"
+                    )
                     )
                     ),
            fluidRow(
