@@ -30,9 +30,9 @@ predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Inten
 
 #load fonts for graphs:
 # windowsFonts(Arial=windowsFont("TT Arial"))
-# windowsFonts(Times=windowsFont("TT Times New Roman")) 
-# windowsFonts(Eras=windowsFont("Eras Light ITC")) 
-# windowsFonts(PR=windowsFont("Poor Richard")) 
+# windowsFonts(Times=windowsFont("TT Times New Roman"))
+# windowsFonts(Eras=windowsFont("Eras Light ITC"))
+# windowsFonts(PR=windowsFont("Poor Richard"))
 
 # Create a palette that maps factor levels to colors for the interactive map:
 pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
@@ -461,7 +461,7 @@ ui <- fixedPage(
                # verbatimTextOutput("oaccuracy"),
            ###########################################################
            absolutePanel(
-             bottom = 100, right = -350, width = 350,
+             bottom = -25, right = -375, width = 350,
              draggable = TRUE,
              wellPanel(
                sliderInput("slider2", label = h6("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
@@ -469,7 +469,7 @@ ui <- fixedPage(
                ),
                checkboxGroupInput("chosen_beaches", "Select which beaches will be predictive:", beach_options),
                actionButton(inputId = "go", label = "Update (~10 sec)"),
-               tags$h5("Model Results:"),
+               tags$h4("Model Results:"),
                plotOutput("graph1")
                ),
              style = "opacity: 0.92"
@@ -478,11 +478,13 @@ ui <- fixedPage(
    
            leafletOutput('mymap', width = 725, height = 900),
                conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                tags$div("Loading...",id="loadmessage")),
-               tags$h6("Hits: Unsafe beach days caught by the model."), 
-               tags$h6("Misses: Unsafe beach days not caught by the model."), 
-               tags$h6("False Alarms: Safe beach days incorrectly flagged as unsafe, based upon the model."), 
-               tags$h6("Correct Rejections: Safe beach days correctly flagged as safe, based upon the model.")
+                                tags$div("Loading...",id="loadmessage"))
+    ),
+    column(12, align="right",
+           tags$h6(tags$b("Correct Rejections:"), "Safe beach days correctly flagged as safe, based upon the model."),
+           tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
+           tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model."), 
+           tags$h6(tags$b("Misses:"), "Unsafe beach days not caught by the model.")
             )
            ),
     fixedRow(
@@ -595,13 +597,15 @@ server <- function(input, output,session) {
   
     output$graph1 <- renderPlot({ggplot(subset2, aes(x=result, y=result_count, fill=Model)) + geom_bar(position="dodge", stat = "identity")+
       theme_bw() + 
-      theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15)) +
-      theme(axis.text.y = element_text(size=15)) +
-        
+      theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
+      theme(axis.text.y = element_text(size=15, family = "Eras")) +
       #ggtitle("Model Results") +
-      theme(plot.title=element_text(size=20)) +
+      #theme(plot.title=element_text(size=20)) +
       labs(y=NULL, x=NULL) +
-      scale_fill_brewer(palette="Paired")
+      scale_fill_brewer(palette="Paired") +
+      theme(legend.title=element_text(family="Eras")) +
+      guides(fill=guide_legend(title=NULL)) +
+      theme(legend.text=element_text(family="Eras"))
       })
     # output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
     # output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
