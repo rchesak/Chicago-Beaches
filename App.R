@@ -91,7 +91,7 @@ ui <- fluidPage(
                    )
              ),
              fluidRow(
-               column(9,
+               column(9, 
                     tags$h5("This is an interactive site for understanding the ", tags$i("E. coli"), " levels at your beaches in Chicago.
                             Please visit the tabs above to access different interactive features."),
                     tags$h5("Everyone knows and loves Chicago's beaches. What they might not know is the work that goes on behind the scenes in order to provide Chicagoans 
@@ -100,40 +100,40 @@ ui <- fluidPage(
                         This is how we know the", tags$i("E. coli"), "levels in the water. However, this test takes 12 hours to run, and can be costly. By the time the
                             test is complete, the beach day is over."),
                     tags$h5("In order to inform the public whether the water is safe for swimming, the City of Chicago uses a combination of the", tags$i("E. coli"), "levels
-                            from the previous days, environmental factors, and knowledge of the relationships between beaches to", tags$b("predict"), "the current",
+                            from the previous days, environmental factors, and knowledge of the relationships between beaches to", tags$em("predict"), "the current",
                             tags$i("E. coli"), "levels.")
                    )
                 ),
 
            fluidRow(
              column(3,
-                    tags$h5("The ", tags$strong("Map"), "tab describes the beach locations and relationships."),
+                    wellPanel(tags$h5("The ", tags$strong("Map"), " tab describes the beach locations and relationships."),
                     tags$img(height = 152.33,
                              width = 208.66,
-                             src = "Map1.png"),
-                    tags$h5("The", tags$strong("Beach Days"), "tab allows you to see how the ", tags$i("E. coli"), " cutoff level affects the number 
+                             src = "Map1.png")),
+                    wellPanel(tags$h5("The", tags$strong("Beach Days"), "tab allows you to see how the ", tags$i("E. coli"), " cutoff level affects the number 
                             of swimmable beach days in the summer."),
                     tags$img(height = 152.33,
                              width = 211.33,
-                             src = "BeachDays.PNG")
+                             src = "BeachDays.PNG"))
                     ),
              column(3,
-                    tags$h5("The ", tags$strong("Predictors"), "tab allows you to explore how different elements of the weather and environment
+                    wellPanel(tags$h5("The ", tags$strong("Predictors"), "tab allows you to explore how different elements of the weather and environment
                             trend with ", tags$i("E. coli"), " levels."),
                     tags$img(height = 180,
                              width = 214.8,
-                             src = "Predictors.PNG")
+                             src = "Predictors.PNG"))
                     ),
              column(3,
-                    tags$h5("The ", tags$strong("Build a Model"), "tab gives you the tools you need to build a model that predicts the ", tags$i("E. coli"), " 
+                    wellPanel(tags$h5("The ", tags$strong("Build a Model"), "tab gives you the tools you need to build a model that predicts the ", tags$i("E. coli"), " 
                             levels at each beach, and see if you're as smart as you think you are."),
                     tags$img(height = 159.66,
                              width = 185,
-                             src = "Model.PNG"),
-                    tags$h5("The ", tags$strong("Network"), "tab describes the relationships that help us predict the ", tags$i("E. coli"), "  levels."),
+                             src = "Model.PNG")),
+                    wellPanel(tags$h5("The ", tags$strong("Network"), "tab describes the relationships that help us predict the ", tags$i("E. coli"), "  levels."),
                     tags$img(height = 184.33,
                              width = 226.66,
-                             src = "Network.PNG")
+                             src = "Network.PNG"))
                     )
            ),
            fluidRow(
@@ -156,7 +156,7 @@ ui <- fluidPage(
              )
            ),
            fluidRow(
-             column(6, offset=0, leafletOutput('mymap2')
+             column(6, offset=0, leafletOutput('mymap2', width = 1700, height = 700)
              ),
              column(4,
                     tags$h5("Each beach is represented on the map as a circle, and they are color-coded to show which beaches have ", tags$i("E. coli"), " 
@@ -292,6 +292,37 @@ ui <- fluidPage(
   
   
   
+  
+  
+  
+  tabPanel("Network",
+           fluidRow(
+             column(12, offset=0, tags$h1("A Network of Beaches:")
+             ),
+             column(12, offset=0,
+                    tags$h4("Below, you can see which beaches have similar", tags$i("E. coli"), "levels. The size of the circle represents the average", 
+                            tags$i("E. coli"), "level at that beach. Each color represents a group that fluctuates together.
+                            The thickness of each line represents the strength of the connection between the", tags$i("E. coli"), "levels at those 2 beaches.
+                            Understanding these relationships is a crucial part of predicting ", tags$i("E. coli"), " levels at each beach."),
+                    column(12, offset=1,tags$img(height = 468,
+                                                 width = 877,
+                                                 src = "Network_Graph.png")
+                    )
+                    )
+  ),
+  fluidRow(
+    column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+           tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
+           tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
+           #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
+           tags$h4("______________________________________________________________________________________________________________")
+    )
+  )
+),
+  
+  
+  
+  
            
            
   
@@ -326,7 +357,7 @@ ui <- fluidPage(
                # verbatimTextOutput("oaccuracy"),
            ###########################################################
            absolutePanel(
-             bottom = -450, right = -350, width = 350,
+             bottom = -475, right = -350, width = 350,
              draggable = TRUE,
              wellPanel(
                sliderInput("slider2", label = h6("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
@@ -359,41 +390,7 @@ ui <- fluidPage(
                     tags$h4("______________________________________________________________________________________________________________")
                     )
                     )
-  ),
-  
-  
-  
-  
-  
-
-
-
-
-
-    tabPanel("Network",
-      fluidRow(
-        column(12, offset=0, tags$h1("A Network of Beaches:")
-               ),
-        column(12, offset=0,
-               tags$h4("Below, you can see which beaches have similar", tags$i("E. coli"), "levels. The size of the circle represents the average", 
-                       tags$i("E. coli"), "level at that beach. Each color represents a group that fluctuates together.
-                       The thickness of each line represents the strength of the connection between the", tags$i("E. coli"), "levels at those 2 beaches.
-                       Understanding these relationships is a crucial part of predicting ", tags$i("E. coli"), " levels at each beach."),
-        column(12, offset=1,tags$img(height = 468,
-                                     width = 877,
-                                     src = "Network_Graph.png")
-               )
-         )
-      ),
-      fluidRow(
-        column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
-               tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
-               tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-               #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-               tags$h4("______________________________________________________________________________________________________________")
-               )
-      )
-      )
+  )
 
   
   )
@@ -554,7 +551,7 @@ server <- function(input, output,session) {
     #addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
     addProviderTiles(providers$Esri.WorldTopoMap) %>%
     # map location:
-    setView(lng=-87.6, lat = 41.85, zoom = 10) %>%                        
+    setView(lng=-87.6, lat = 41.85, zoom = 11) %>%                        
     # add some circles:
     addCircles(
       ~Longitude, ~Latitude,
