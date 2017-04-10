@@ -39,7 +39,7 @@ pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
 factpal <- colorFactor(c("blue", "red", "green", "purple", "orange", "maroon3" ), lng_lat_df$Group)
 
 #Create label content for interactive map:
-content2 <- paste(sep = "",c
+content2 <- paste(sep = "",
                   lng_lat_df$Client.ID,
                   ": You caught ",
                   "12",
@@ -143,13 +143,18 @@ ui <- fixedPage(
                     )
            ),
            fixedRow(
-             column(12, align="center", 
-                    tags$h4("______________________________________________________________________________________________________________"),
-                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-                    #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-                    tags$h4("______________________________________________________________________________________________________________")
+             column(12, align="center",
+                    tags$h4("__________________________________________________________________________________________________________________________________________________")
+             ),
+             column(12,
+                    tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
+                            information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
+                                                                                        "linkedin.com/in/renel-chesak"), "")
+           ),
+           column(12, align="center",
+                  tags$h4("__________________________________________________________________________________________________________________________________________________")
+           )
                     )
-                   )
   ),
   
   
@@ -193,13 +198,18 @@ ui <- fixedPage(
                     )
                     ),
            fixedRow(
-             column(12, align="center",  
-                    tags$h4("______________________________________________________________________________________________________________"),
-                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-                    #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-                    tags$h4("______________________________________________________________________________________________________________")
-             )
+             column(12, align="center",
+                    tags$h4("__________________________________________________________________________________________________________________________________________________")
+             ),
+             column(12,
+                    tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
+                            information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
+                                                                                        "linkedin.com/in/renel-chesak"), "")
+           ),
+           column(12, align="center",
+                  tags$h4("__________________________________________________________________________________________________________________________________________________")
            )
+                    )
   ),
   
   
@@ -265,12 +275,17 @@ ui <- fixedPage(
            
            fixedRow(
              column(12, align="center",
-                    tags$h4("______________________________________________________________________________________________________________"),
-                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-                    #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-                    tags$h4("______________________________________________________________________________________________________________")
-             )
+                    tags$h4("__________________________________________________________________________________________________________________________________________________")
+             ),
+             column(12,
+                    tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
+                            information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
+                                                                                        "linkedin.com/in/renel-chesak"), "")
+           ),
+           column(12, align="center",
+                  tags$h4("__________________________________________________________________________________________________________________________________________________")
            )
+                    )
            ),
   
   
@@ -295,16 +310,17 @@ ui <- fixedPage(
              ),
              column(12, 
                     absolutePanel(
-                      bottom = -350, right = 50, width = 300,
+                      bottom = -335, right = 50, width = 300,
                       draggable = TRUE,
                       wellPanel(
+                        selectInput("predictor", tags$h5("Select a Predictor:"), choices = predictor_options),
                         tags$h5(
                           "Which elements of the environment trend with ", tags$i("E. coli"), " levels? Data scientists use 
                           elements that trend together to predict each other. Look for 
                           the predictor whose line graph peaks and valleys with the average", tags$i("E. coli"), "levels."
-                          ),
-                        selectInput("predictor", tags$h5("Select a Predictor:"), choices = predictor_options)
+                        )
                         ),
+
                       style = "opacity: 0.92"
                       )
              ),
@@ -331,12 +347,18 @@ ui <- fixedPage(
                     ),
            fixedRow(
              column(12, align="center",
-                    tags$h4("______________________________________________________________________________________________________________"),
-                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-                    #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-                    tags$h4("______________________________________________________________________________________________________________")
-             )
+                    tags$h4("      "),
+                    tags$h4("__________________________________________________________________________________________________________________________________________________")
+             ),
+             column(12,
+                    tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
+                            information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
+                                                                                        "linkedin.com/in/renel-chesak"), "")
+           ),
+           column(12, align="center",
+                  tags$h4("__________________________________________________________________________________________________________________________________________________")
            )
+                    )
            ),
   
   
@@ -372,15 +394,21 @@ ui <- fixedPage(
                     )
                     )
   ),
+
   fixedRow(
-    column(12, align="center", 
-           tags$h4("______________________________________________________________________________________________________________"),
-           tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
-           tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-           #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-           tags$h4("______________________________________________________________________________________________________________")
+    column(12, align="center",
+           tags$h4("__________________________________________________________________________________________________________________________________________________")
+    ),
+    column(12,
+           tags$h5("The network graph was built by Norie Kauffman and Don Crowley."), 
+           tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
+                   information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
+                                                                               "linkedin.com/in/renel-chesak"), "")
+    ),
+    column(12, align="center",
+           tags$h4("__________________________________________________________________________________________________________________________________________________")
     )
-  )
+           )
 ),
   
   
@@ -459,12 +487,19 @@ ui <- fixedPage(
            ),
     fixedRow(
              column(12, align="center",
-                    tags$h4("______________________________________________________________________________________________________________"),
-                    tags$h5("The algorithm used in this app was built by some very bright folks working for
-                            the City of Chicago, including Callin Osborn and his team."),
-                    tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
-                    #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
-                    tags$h4("______________________________________________________________________________________________________________")
+                    tags$h4("__________________________________________________________________________________________________________________________________________________")
+             ),
+            column(12,
+                    tags$h5("The algorithm used in this app was built by the City of Chicago's Department of Innovation and Technology 
+                           (", tags$a(href = "https://github.com/Chicago", "@cityofchicago"), "),
+                            and it's incorporation into this app would not have been possible without the help of 
+                            Callin Osborn (", tags$a(href = "https://github.com/CallinOsborn", "@CallinOsborn"), ")."), 
+                    tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
+                            information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
+                                                                                        "linkedin.com/in/renel-chesak"), "")
+            ),
+            column(12, align="center",
+                    tags$h4("__________________________________________________________________________________________________________________________________________________")
                     )
                     )
   )
@@ -594,7 +629,7 @@ server <- function(input, output,session) {
                    percent_days = days / sum(days) * 100)
   
 
-  output$graph2 <- renderPlot({ggplot(newdata, aes(x=Client.ID, y=percent_days, fill=underthresh)) + geom_bar(stat = "identity")+
+  output$graph2 <- renderPlot({ggplot(newdata, aes(x=Client.ID, y=percent_days, fill=underthresh, alpha=.9)) + geom_bar(stat = "identity")+
     theme_bw() + 
     theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
     theme(axis.text.y = element_text(size=15, family = "Eras")) +
@@ -604,7 +639,8 @@ server <- function(input, output,session) {
     theme(axis.title.y=element_text(size=15, family = "Eras")) +
     scale_fill_brewer(labels = c("No", "Yes"), palette="Paired") +
     theme(legend.title=element_text(family="Eras")) +
-    theme(legend.text=element_text(family="Eras")) 
+    theme(legend.text=element_text(family="Eras")) +
+    guides(alpha=FALSE)
        })
   })
   
