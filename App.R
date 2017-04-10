@@ -6,7 +6,9 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+# 
+# library(extrafont)
+# font_import()
 library(shiny)
 library(ggplot2)
 library(gridExtra)
@@ -26,7 +28,11 @@ beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "
 predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Intensity", "Wind_Speed",
                        "Barometric_Pressure", "Visibility", "Cloud_Cover")
 
-
+#load fonts for graphs:
+# windowsFonts(Arial=windowsFont("TT Arial"))
+# windowsFonts(Times=windowsFont("TT Times New Roman")) 
+# windowsFonts(Eras=windowsFont("Eras Light ITC")) 
+# windowsFonts(PR=windowsFont("Poor Richard")) 
 
 # Create a palette that maps factor levels to colors for the interactive map:
 pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
@@ -68,30 +74,30 @@ content7 <- paste0("<strong>Beach: </strong>",
 
 
 # Define UI for application that draws graphs
-ui <- fluidPage(
+ui <- fixedPage(
   #to test out themes, uncomment next line and comment out the line below it.
   #shinythemes::themeSelector(), 
   theme = shinytheme("yeti"),
   tabsetPanel(
   
   tabPanel("Home", 
-           fluidRow(
-             column(2, offset = 1,
+           fixedRow(
+             column(4, align="center",
                     tags$img(height = 110.1333,
                              width = 166.4,
                              src = "SmallerChicagoFlag.PNG")
                     ),
-             column(2,
-                    tags$h1("Welcome!")
+             column(4, align="center",
+                    tags$h1("City of Chicago Beaches")
              ),
-             column(3,
+             column(4, align="center",
                     tags$img(height = 110.1333,
                              width = 166.4,
                              src = "SmallerChicagoFlag.PNG")
                    )
              ),
-             fluidRow(
-               column(9, 
+           fixedRow(
+               column(12, #align="center",
                     tags$h5("This is an interactive site for understanding the ", tags$i("E. coli"), " levels at your beaches in Chicago.
                             Please visit the tabs above to access different interactive features."),
                     tags$h5("Everyone knows and loves Chicago's beaches. What they might not know is the work that goes on behind the scenes in order to provide Chicagoans 
@@ -105,39 +111,40 @@ ui <- fluidPage(
                    )
                 ),
 
-           fluidRow(
-             column(3,
+           fixedRow(
+             column(4,
                     wellPanel(tags$h5("The ", tags$strong("Map"), " tab describes the beach locations and relationships."),
-                    tags$img(height = 152.33,
-                             width = 208.66,
+                    tags$img(height = 238.015625,
+                             width = 326.03125,
                              src = "Map1.png")),
                     wellPanel(tags$h5("The", tags$strong("Beach Days"), "tab allows you to see how the ", tags$i("E. coli"), " cutoff level affects the number 
                             of swimmable beach days in the summer."),
-                    tags$img(height = 152.33,
-                             width = 211.33,
+                    tags$img(height = 203.1061589,
+                             width = 281.77326289,
                              src = "BeachDays.PNG"))
                     ),
-             column(3,
+             column(4,
                     wellPanel(tags$h5("The ", tags$strong("Predictors"), "tab allows you to explore how different elements of the weather and environment
                             trend with ", tags$i("E. coli"), " levels."),
-                    tags$img(height = 180,
-                             width = 214.8,
+                    tags$img(height = 239.994,
+                             width = 286.39284,
                              src = "Predictors.PNG"))
                     ),
-             column(3,
+             column(4,
                     wellPanel(tags$h5("The ", tags$strong("Build a Model"), "tab gives you the tools you need to build a model that predicts the ", tags$i("E. coli"), " 
                             levels at each beach, and see if you're as smart as you think you are."),
-                    tags$img(height = 159.66,
-                             width = 185,
+                    tags$img(height = 266.0989356,
+                             width = 308.3321,
                              src = "Model.PNG")),
                     wellPanel(tags$h5("The ", tags$strong("Network"), "tab describes the relationships that help us predict the ", tags$i("E. coli"), "  levels."),
-                    tags$img(height = 184.33,
-                             width = 226.66,
+                    tags$img(height = 245.767189,
+                             width = 302.205778,
                              src = "Network.PNG"))
                     )
            ),
-           fluidRow(
-             column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+           fixedRow(
+             column(12, align="center", 
+                    tags$h4("______________________________________________________________________________________________________________"),
                     tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("______________________________________________________________________________________________________________")
@@ -151,16 +158,17 @@ ui <- fluidPage(
   
   
   tabPanel("Map",
-           fluidRow(
+           fixedRow(
              column(12, offset=0, tags$h1("Which Beaches Behave Similarly?")
              )
            ),
-           fluidRow(
-             column(6, offset=0, leafletOutput('mymap2', width = 1700, height = 700)
+           fixedRow(
+             column(12, align="center", 
+                    leafletOutput('mymap2', width = 1200, height = 700)
              ),
-             column(4,
+             column(12, #align="center", 
                     absolutePanel(
-                      bottom = -500, right = 900, width = 350,
+                      bottom = 250, right = 100, width = 350,
                       draggable = TRUE,
                       wellPanel(tags$h4("Draggable Box"),
                       tags$h5("Each beach is represented on the map as a circle, and they are color-coded to show which beaches have ", tags$i("E. coli"), " 
@@ -173,8 +181,9 @@ ui <- fluidPage(
                     )
                     )
                     ),
-           fluidRow(
-             column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+           fixedRow(
+             column(12, align="center",  
+                    tags$h4("______________________________________________________________________________________________________________"),
                     tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("______________________________________________________________________________________________________________")
@@ -189,12 +198,12 @@ ui <- fluidPage(
   
   
   tabPanel("Beach Days",
-           fluidRow(
+           fixedRow(
              column(12, offset=0, tags$h1("Set your own limit:")
              )
            ),
-           fluidRow(
-             column(12,
+           fixedRow(
+             column(12, #align="center",
                     absolutePanel(
                       bottom = -375, right = 100, width = 300,
                       draggable = TRUE,
@@ -210,7 +219,7 @@ ui <- fluidPage(
                         ),
                       style = "opacity: 0.92"
                         )),
-             column(8, 
+             column(8, align="center",
                     tags$head(tags$style(type="text/css", "
                                          #loadmessage {
                                          position: fixed;
@@ -232,8 +241,9 @@ ui <- fluidPage(
                   )
              ),
            
-           fluidRow(
-             column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+           fixedRow(
+             column(12, align="center",
+                    tags$h4("______________________________________________________________________________________________________________"),
                     tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("______________________________________________________________________________________________________________")
@@ -247,8 +257,9 @@ ui <- fluidPage(
   
   
   tabPanel("Predictors",
-           fluidRow(
-             column(12, offset=0, tags$h1("Pick a Predictor:")
+           fixedRow(
+             column(12, offset=0, 
+                    tags$h1("Pick a Predictor:")
              ),
              column(12, 
                     absolutePanel(
@@ -286,8 +297,9 @@ ui <- fluidPage(
                                      tags$div("Loading...",id="loadmessage"))
                     )
                     ),
-           fluidRow(
-             column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+           fixedRow(
+             column(12, align="center",
+                    tags$h4("______________________________________________________________________________________________________________"),
                     tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
                     #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
                     tags$h4("______________________________________________________________________________________________________________")
@@ -302,7 +314,7 @@ ui <- fluidPage(
   
   
   tabPanel("Network",
-           fluidRow(
+           fixedRow(
              column(12, offset=0, tags$h1("A Network of Beaches:")
              ),
              column(12, offset=0,
@@ -316,8 +328,9 @@ ui <- fluidPage(
                     )
                     )
   ),
-  fluidRow(
-    column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+  fixedRow(
+    column(12,align="center", 
+           tags$h4("______________________________________________________________________________________________________________"),
            tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
            tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
            #column(12, offset=4, tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak")),
@@ -333,10 +346,10 @@ ui <- fluidPage(
            
   
   tabPanel("Build a Model",
-  fluidRow(column(12, offset=0, tags$h1("Can you predict better?"))
+           fixedRow(column(12, offset=0, tags$h1("Can you predict better?"))
            ),
   
-  fluidRow(
+           fixedRow(
     column(8, offset=0,
                 tags$h5("The beaches you select will be entered into an algorithm, which will then be used to 
                        create a predictive model. After you hit the Update button, give the algorithm ", tags$b("10 seconds"), " to run,
@@ -363,7 +376,7 @@ ui <- fluidPage(
                # verbatimTextOutput("oaccuracy"),
            ###########################################################
            absolutePanel(
-             bottom = -475, right = -350, width = 350,
+             bottom = 50, right = -350, width = 350,
              draggable = TRUE,
              wellPanel(
                sliderInput("slider2", label = h6("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
@@ -378,7 +391,7 @@ ui <- fluidPage(
                ),
            ##########################################################
    
-           leafletOutput('mymap'),
+           leafletOutput('mymap', width = 725, height = 900),
                conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                 tags$div("Loading...",id="loadmessage")),
                tags$h6("Hits: Unsafe beach days caught by the model."), 
@@ -387,8 +400,9 @@ ui <- fluidPage(
                tags$h6("Correct Rejections: Safe beach days correctly flagged as safe, based upon the model.")
             )
            ),
-          fluidRow(
-             column(12, offset=0, tags$h4("______________________________________________________________________________________________________________"),
+    fixedRow(
+             column(12, align="center",
+                    tags$h4("______________________________________________________________________________________________________________"),
                     tags$h5("The algorithm used in this app was built by some very bright folks working for
                             the City of Chicago, including Callin Osborn and his team."),
                     tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
@@ -426,7 +440,7 @@ server <- function(input, output,session) {
       #addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
       addProviderTiles(providers$Esri.WorldTopoMap) %>%
       # map location:
-      setView(lng=-87.6, lat = 41.85, zoom = 10) %>%                        
+      setView(lng=-87.6, lat = 41.85, zoom = 11) %>%                        
       # add some circles:
       addCircles(
         ~Longitude, ~Latitude,
@@ -522,15 +536,18 @@ server <- function(input, output,session) {
   newdata <- ddply(data16, "Client.ID", transform, 
                    percent_days = days / sum(days) * 100)
   
+
   output$graph2 <- renderPlot({ggplot(newdata, aes(x=Client.ID, y=percent_days, fill=underthresh)) + geom_bar(stat = "identity")+
     theme_bw() + 
-    theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15)) +
-    theme(axis.text.y = element_text(size=15)) +
+    theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
+    theme(axis.text.y = element_text(size=15, family = "Eras")) +
     ggtitle("Swimmable Beach Days in 2016") +
-    theme(plot.title=element_text(size=20)) +
+    theme(plot.title=element_text(size=20, family = "Eras")) +
     labs(y="Percent of \nBeach Days", x=NULL, fill = "Swimmable?") +
-    theme(axis.title.y=element_text(size=15)) +
-    scale_fill_brewer(labels = c("No", "Yes"), palette="Paired")
+    theme(axis.title.y=element_text(size=15, family = "Eras")) +
+    scale_fill_brewer(labels = c("No", "Yes"), palette="Paired") +
+    theme(legend.title=element_text(family="Eras")) +
+    theme(legend.text=element_text(family="Eras")) 
        })
   })
   
@@ -538,11 +555,11 @@ server <- function(input, output,session) {
   #graph 3 (line graphs):
   observeEvent(input$predictor, {
     plot1 <- ggplot(data= linegraphdata, aes(x=Year, y=E_coli)) + geom_line() + theme_bw() +
-      theme(axis.title=element_text(size=15), axis.text=element_text(size=13))
+      theme(axis.title=element_text(size=15, family = "Eras"), axis.text=element_text(size=13, family = "Eras"))
     
     #note: aes_string allows R to tie the input back to the linegraphdata data frame. Have to put Year in quotes when you use aes_string though
     plot2 <- ggplot(data = linegraphdata, aes_string(x="Year", y=input$predictor)) + geom_line() + theme_bw() +
-      theme(axis.title=element_text(size=15), axis.text=element_text(size=13))
+      theme(axis.title=element_text(size=15, family = "Eras"), axis.text=element_text(size=13, family = "Eras"))
     
     output$graph3 <- renderPlot({grid.arrange(plot1, plot2, ncol=1)})
   })
