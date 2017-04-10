@@ -39,7 +39,7 @@ pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
 factpal <- colorFactor(c("blue", "red", "green", "purple", "orange", "maroon3" ), lng_lat_df$Group)
 
 #Create label content for interactive map:
-content2 <- paste(sep = "",
+content2 <- paste(sep = "",c
                   lng_lat_df$Client.ID,
                   ": You caught ",
                   "12",
@@ -159,7 +159,18 @@ ui <- fixedPage(
   
   tabPanel("Map",
            fixedRow(
-             column(12, offset=0, tags$h1("Which Beaches Behave Similarly?")
+             column(4, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
+             ),
+             column(4, align="center",
+                    tags$h1("Which Beaches Behave Similarly?")
+             ),
+             column(4, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
              )
            ),
            fixedRow(
@@ -199,8 +210,19 @@ ui <- fixedPage(
   
   tabPanel("Beach Days",
            fixedRow(
-             column(12, offset=0, tags$h1("Set your own limit:")
-             )
+               column(4, align="center",
+                      tags$img(height = 110.1333,
+                               width = 166.4,
+                               src = "SmallerChicagoFlag.PNG")
+               ),
+               column(4, align="center",
+                      tags$h1("Set Your Own Limit")
+               ),
+               column(4, align="center",
+                      tags$img(height = 110.1333,
+                               width = 166.4,
+                               src = "SmallerChicagoFlag.PNG")
+               )
            ),
            fixedRow(
              column(12, #align="center",
@@ -258,12 +280,22 @@ ui <- fixedPage(
   
   tabPanel("Predictors",
            fixedRow(
-             column(12, offset=0, 
-                    tags$h1("Pick a Predictor:")
+             column(4, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
+             ),
+             column(4, align="center",
+                    tags$h1("Pick a Predictor")
+             ),
+             column(4, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
              ),
              column(12, 
                     absolutePanel(
-                      bottom = -300, right = 100, width = 300,
+                      bottom = -350, right = 50, width = 300,
                       draggable = TRUE,
                       wellPanel(
                         tags$h5(
@@ -276,7 +308,7 @@ ui <- fixedPage(
                       style = "opacity: 0.92"
                       )
              ),
-             column(8, 
+             column(7, offset=1,
                     tags$head(tags$style(type="text/css", "
                                          #loadmessage {
                                          position: fixed;
@@ -315,21 +347,33 @@ ui <- fixedPage(
   
   tabPanel("Network",
            fixedRow(
-             column(12, offset=0, tags$h1("A Network of Beaches:")
+             column(4, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
              ),
-             column(12, offset=0,
+             column(4, align="center",
+                    tags$h1("A Network of Beaches")
+             ),
+             column(4, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
+             ),
+             column(12, #align="center",
                     tags$h4("Below, you can see which beaches have similar", tags$i("E. coli"), "levels. The size of the circle represents the average", 
                             tags$i("E. coli"), "level at that beach. Each color represents a group that fluctuates together.
                             The thickness of each line represents the strength of the connection between the", tags$i("E. coli"), "levels at those 2 beaches.
                             Understanding these relationships is a crucial part of predicting ", tags$i("E. coli"), " levels at each beach."),
-                    column(12, offset=1,tags$img(height = 468,
-                                                 width = 877,
-                                                 src = "Network_Graph.png")
+                    column(12, align="center",
+                           tags$img(height = 428.2875,
+                                    width = 983.23875,
+                                    src = "Network_Graph.png")
                     )
                     )
   ),
   fixedRow(
-    column(12,align="center", 
+    column(12, align="center", 
            tags$h4("______________________________________________________________________________________________________________"),
            tags$h5("The network graph was built by Norie Kauffman and Don Crowley."),
            tags$h5("This Shiny app was built by Renel Chesak. For contact information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", "linkedin.com/in/renel-chesak"), ""),
@@ -346,7 +390,20 @@ ui <- fixedPage(
            
   
   tabPanel("Build a Model",
-           fixedRow(column(12, offset=0, tags$h1("Can you predict better?"))
+           fixedRow(
+             column(2, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
+             ),
+             column(3, align="center",
+                    tags$h1("Can You Predict Better?")
+             ),
+             column(2, align="center",
+                    tags$img(height = 110.1333,
+                             width = 166.4,
+                             src = "SmallerChicagoFlag.PNG")
+             )
            ),
   
            fixedRow(
@@ -376,7 +433,7 @@ ui <- fixedPage(
                # verbatimTextOutput("oaccuracy"),
            ###########################################################
            absolutePanel(
-             bottom = 50, right = -350, width = 350,
+             bottom = 100, right = -350, width = 350,
              draggable = TRUE,
              wellPanel(
                sliderInput("slider2", label = h6("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
