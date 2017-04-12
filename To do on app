@@ -1,26 +1,22 @@
 To do
 
 Renel:
-1.	Look more professional 
-2.	DONE Replace accuracy with a simple measure for the prediction outcomes
-3.	DONE Add threshold slider that updates instantly (how instantly?)
-  a.	not tied to update button? ********Callin, what were we thinking on this one? *************
-4.	Tie prediction outcomes to map (BIG)
-  a.	I need predictions for each individual beach as output to tie it to the map 
-5.	DONE Upload all my files
-6.	Record what people’s responses are for the algorithm
-7.	DONE Get a license fdile (see tldrlegal.com)
-  a.	Mit
-  b.	Apache
-  c.	Lgpl
-8.	Find out more about user group presentation
+1.	I need predictions for each individual beach as output to tie it to the map 
+2.	Record what people’s responses are for the algorithm
+3.	Change slider from threshold to FP (false alarms) rate (setting FP rate equal for both models) IN PERCENTAGE = false alarms / (Correct rejections + false alarms)
+4.	Change color of beaches on prediction map to a color scale explaining how well their model performed on that beach
+5.	Change prediction bar graph to be percentage and only include hits and false alarms
+  a.	Correct rejections + false alarms = good days. 
+  b.	Hits
+6.	Want to display the $ cost of a hit (cost of keeping people safe)
+  a.	I need $ value for cost of a false alarm
+  b.	Incorporate the cost of a test
+
 
 Callin:
-1.	I need predictions for each individual beach as output to tie it to the map 
-2.	I need to know how to color the clusters on the map – how is this algorithm using the beach input?
-3.	DONE The North Avenue and Oak Street beaches to be fixed in the algorithm code so they can be added back to the beach checklist
-4.	DONE Make the algorithm run much faster (maybe 10 seconds tops)
-5.	We need to tie the slider input to the algorithm? Right now, I think it is permanently set at 235. The only thing the slider 
-    currently changes is which tp, fn, tn, fp are selected from the model summary. Is this what they want? 
-6. Make sure the verbage in each tab is accurate.
-7. Fix error when selecting every beach for the algorithm.
+1.	Give Renel predictions for each individual beach as output to tie it to the map 
+2.	Make sure the verbage in each tab is accurate.
+3.	Fix error when selecting every beach for the algorithm.
+4.	Fix issue when you select no beaches
+5. Get Renel $ value for cost of a false alarm
+6. Get Renel $ value for cost of a test
