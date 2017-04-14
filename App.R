@@ -13,8 +13,9 @@ library(shiny)
 library(ggplot2)
 library(gridExtra)
 library(plyr)
-library(leaflet)
 library(shinythemes)
+library(networkD3)
+library(leaflet)
 
 source("30_ModelFunc.R")
 
@@ -22,6 +23,9 @@ source("30_ModelFunc.R")
 data16 = read.csv("data16.csv")
 linegraphdata = read.csv("linegraphdata.csv")
 lng_lat_df = read.csv("mapdata.csv")
+beachLinks = read.csv("beachLinks.csv")
+beachLinks$value <- ((beachLinks$value ^ 4)*10) #allows you to see the differences between values more readily. is this misleading without a legend?
+beachNodes = read.csv("beachNodes.csv")
 
 #list all possible options for the selection menus:
 beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "Howard", "Jarvis", "Juneway","Leone", "Montrose","North Avenue", "Oak Street", "Ohio", "Osterman", "Rainbow", "Rogers", "South Shore", "39th")
@@ -184,7 +188,7 @@ ui <- fixedPage(
              ),
              column(12, #align="center", 
                     absolutePanel(
-                      bottom = 250, right = 100, width = 350,
+                      bottom = 200, right = 0, width = 350,
                       draggable = TRUE,
                       wellPanel(tags$h4("Draggable Box"),
                       tags$h5("Each beach is represented on the map as a circle, and they are color-coded to show which beaches have ", tags$i("E. coli"), " 
@@ -387,10 +391,9 @@ ui <- fixedPage(
                             tags$i("E. coli"), "level at that beach. Each color represents a group that fluctuates together.
                             The thickness of each line represents the strength of the connection between the", tags$i("E. coli"), "levels at those 2 beaches.
                             Understanding these relationships is a crucial part of predicting ", tags$i("E. coli"), " levels at each beach."),
-                    column(12, align="center",
-                           tags$img(height = 428.2875,
-                                    width = 983.23875,
-                                    src = "Network_Graph.png")
+             column(12, align="center",
+                    forceNetworkOutput("force")
+
                     )
                     )
   ),
@@ -400,7 +403,6 @@ ui <- fixedPage(
            tags$h4("__________________________________________________________________________________________________________________________________________________")
     ),
     column(12,
-           tags$h5("The network graph was built by Norie Kauffman and Don Crowley."), 
            tags$h5("This Shiny app was built by Renel Chesak (", tags$a(href = "https://github.com/rchesak", "@rchesak"), "). For contact 
                    information, please visit her profile on LinkedIn:", tags$a(href = "https://www.linkedin.com/in/renel-chesak-541067a1/", 
                                                                                "linkedin.com/in/renel-chesak"), "")
@@ -527,7 +529,7 @@ server <- function(input, output,session) {
   observeEvent(input$go, {
     #map:
     # Plot a default web map 
-    map <- leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
+    map <- leaflet::leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
     #customize your map:
     map2 <- map %>%
       #use a third-party tile that looks better:
@@ -664,7 +666,7 @@ server <- function(input, output,session) {
   ###########
   #map 2 (for map tab):
   # Plot a default web map 
-  mapA <- leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
+  mapA <- leaflet::leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
   #customize your map:
   mapB <- mapA %>%
     #use a third-party tile that looks better:
@@ -690,6 +692,22 @@ server <- function(input, output,session) {
   # )
   
   output$mymap2 = renderLeaflet(mapB)
+  
+  ############
+  #Network Graph
+  
+  output$force <- renderForceNetwork({
+    networkD3::forceNetwork(Links = beachLinks, Nodes = beachNodes, Source = "source",
+                            Target = "target", Value = "value", 
+                            NodeID = "name",  colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10);"),
+                            Nodesize = "size", #radiusCalculation = "d.nodesize", #radiusCalculation = " Math.sqrt(d.nodesize)+6",
+                            fontFamily = "Eras Light ITC", fontSize = 20, opacityNoHover = .99,
+                            linkDistance = 300, charge = -120, legend = FALSE, clickAction = NULL,
+                            # width = 1500, height = 300,
+                            Group = "group", opacity = 1, zoom = F, bounded = T)
+  })
+  
+  
 
 }
 
