@@ -16,6 +16,7 @@ library(plyr)
 library(shinythemes)
 library(networkD3)
 library(leaflet)
+library(grDevices)
 
 
 source("30_ModelFunc.R")
@@ -27,8 +28,8 @@ lng_lat_df = read.csv("mapdata.csv")
 beachLinks = read.csv("beachLinks.csv")
 beachLinks$value <- ((beachLinks$value ^ 4)*10) #allows you to see the differences between values more readily. is this misleading without a legend?
 beachNodes = read.csv("beachNodes.csv")
-#                                          orange      blue        gree       pink       purple      red
-ColourScale <- 'd3.scaleOrdinal().range([ "#FFA500", "#4169E1",  "#32CD32", "#FFC0CB", "#8A2BE2", "#FF6347"]);'
+#                                          orange      blue        green      purple     pink        red
+ColourScale <- 'd3.scaleOrdinal().range([ "#F57C00", "#0288D1",  "#229954", "#7B1FA2", "#EC407A", "#B71C1C"]);'
 
 #list all possible options for the selection menus:
 beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "Howard", "Jarvis", "Juneway","Leone", "Montrose","North Avenue", "Oak Street", "Ohio", "Osterman", "Rainbow", "Rogers", "South Shore", "39th")
@@ -42,8 +43,8 @@ predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Inten
 # windowsFonts(PR=windowsFont("Poor Richard"))
 
 # Create a palette that maps factor levels to colors for the interactive map:
-pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
-factpal <- colorFactor(c("blue", "red", "green", "purple", "orange", "maroon3" ), lng_lat_df$Group)
+#                          blue       red        green       pink       orange     purple
+factpal <- colorFactor(c("#0288D1", "#B71C1C",  "#229954", "#EC407A", "#F57C00", "#7B1FA2"), lng_lat_df$Group)
 
 #Create label content for interactive map:
 content2 <- paste(sep = "",
@@ -681,7 +682,7 @@ server <- function(input, output,session) {
     addCircles(
       ~Longitude, ~Latitude,
       radius = ~AvgEcoli*3,
-      color = ~factpal(Group),
+      color = ~factpal(Group), #networkD3::JS(ColourScale),  
       #label = content6,
       #label = ~as.character(AvgEcoli),
       label = "Click me!",
