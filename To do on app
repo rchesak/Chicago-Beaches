@@ -7,7 +7,7 @@ Renel:
 4.	Change color of beaches on prediction map to a color scale explaining how well their model performed on that beach
 5.	Change prediction bar graph to be percentage and only include hits and false alarms
   a.	Correct rejections + false alarms = good days. 
-  b.	Hits
+  b.	Hits + misses = bad days.
 6.	Want to display the $ cost of a hit (cost of keeping people safe)
   a.	I need $ value for cost of a false alarm
   b.	Incorporate the cost of a test
@@ -17,8 +17,10 @@ Renel:
 
 Callin:
 1.	Give Renel predictions for each individual beach as output to tie it to the map 
-2.	Make sure the verbage in each tab is accurate.
+2.	Make sure the verbiage in each tab is accurate.
 3.	Fix error when selecting every beach for the algorithm.
 4.	Fix issue when you select no beaches
 5. Get Renel $ value for cost of a false alarm
 6. Get Renel $ value for cost of a test
+7. To make the algorithm run faster: since the output to the "Model Summary" is always the same for USGS, can we take those calculations
+out of commission and just let the graphs pull from a static text file for the USGS results?
