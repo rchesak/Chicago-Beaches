@@ -16,7 +16,10 @@ library(plyr)
 library(shinythemes)
 library(networkD3)
 library(leaflet)
-library(grDevices)
+library(scales)
+# library(extrafont)
+# font_import(paths = NULL, recursive = TRUE, prompt = FALSE,
+#             pattern = NULL)
 
 
 source("30_ModelFunc.R")
@@ -442,12 +445,17 @@ ui <- fixedPage(
   
            fixedRow(
     column(8, offset=0,
-                tags$h5("The beaches you select will be entered into an algorithm, which will then be used to 
-                       create a predictive model. After you hit the Update button, give the algorithm ", tags$b("10 seconds"), " to run,
-                        and your results will populate."),
+                tags$h5("Decide which beaches will be predictive, hit the Update button, and your chosen beaches will be entered into an algorithm.
+                       Give the algorithm ", tags$b("10 seconds"), " to run, and the resulting model predictions will populate for your model, and for 
+                       the USGS model. Can you predict better that the US Geological Survey?"),
                tags$h5("After selecting beaches and hitting update, the interactive map that populates below will show you how your model did at 
               each beach. The graph that populates below, on the right, will show you how well your model performed compared
                        to the model used by the City of Chicago."), 
+               tags$h5("Move the slider bar on the right to adjust the hit rate, which is the percentage of unsafe beach days that the models will 
+                       catch. Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
+                       comes at a cost: false alarms which costs taxpayer money because no one buys tickets to go to the beach. This presents an optimization problem where you are not only 
+                       trying to get the most hits, but also the most hits for the lowest cost to taxpayers."),
+           tags$h3(textOutput("results_verbiage")),
                tags$head(tags$style(type="text/css", "
              #loadmessage {
                                     position: fixed;
@@ -463,18 +471,17 @@ ui <- fixedPage(
                                     z-index: 105;
                                     }
                                     ")),
-               # verbatimTextOutput("yaccuracy"), 
-               # verbatimTextOutput("oaccuracy"),
            ###########################################################
            absolutePanel(
-             bottom = -25, right = -375, width = 350,
+             bottom = 0, right = -375, width = 350,
              draggable = TRUE,
              wellPanel(
-               sliderInput("slider2", label = h6("", tags$i("E. coli"), "cutoff (in CFU/100mL)"), min = 1, 
-                           max = 500, value = 235
-               ),
                checkboxGroupInput("chosen_beaches", "Select which beaches will be predictive:", beach_options),
-               actionButton(inputId = "go", label = "Update (~10 sec)"),
+               actionButton(inputId = "go", label = "Update beaches (~10 sec)"),
+               tags$h5("After building your model with the beaches, move the slider bar below to optimize the model so that you can achieve the most hits per dollar of taxpayer money."),
+               sliderInput("slider2", label = h5("Hit rate:"), min = 5, 
+                           max = 100, value = 95
+               ),
                tags$h4("Model Results:"),
                plotOutput("graph1")
                ),
@@ -487,10 +494,8 @@ ui <- fixedPage(
                                 tags$div("Loading...",id="loadmessage"))
     ),
     column(12, align="right",
-           tags$h6(tags$b("Correct Rejections:"), "Safe beach days correctly flagged as safe, based upon the model."),
            tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
-           tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model."), 
-           tags$h6(tags$b("Misses:"), "Unsafe beach days not caught by the model.")
+           tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
             )
            ),
     fixedRow(
@@ -530,11 +535,14 @@ server <- function(input, output,session) {
 
   ####################
   #graph 1 and interactive map:
-  observeEvent(input$go, {
+  observeEvent(input$go, { #everything inside here is tied to the update button
+    #call the function given the input, and return the output as model_summary:
+    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3) 
+    
     #map:
-    # Plot a default web map 
+    # create a default web map 
     map <- leaflet::leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
-    #customize your map:
+    #customize the map:
     map2 <- map %>%
       #use a third-party tile that looks better:
       #addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
@@ -560,63 +568,70 @@ server <- function(input, output,session) {
     
     output$mymap = renderLeaflet(map2)
     
-   
-    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(input$slider2),num_of_folds = 3) #calls the function given the input, and returns the output as model_summary
-    
-    
-    #bar graph for algorithm results:
-    
-    hits = model_summary[input$slider2, 10]
-    misses = model_summary[input$slider2, 11]
-    correct_rejections = model_summary[input$slider2, 12]
-    false_alarms = model_summary[input$slider2, 13]
-    
-    USGS_hits = model_summary[input$slider2, 14]
-    USGS_misses = model_summary[input$slider2, 15]
-    USGS_correct_rejections = model_summary[input$slider2, 16]
-    USGS_false_alarms = model_summary[input$slider2, 17]
-    
-    #______________________________________________
-    
-    # hits = model_summary[235, 10]
-    # misses = model_summary[235, 11]
-    # correct_rejections = model_summary[235, 12]
-    # false_alarms = model_summary[235, 13]
-    # 
-    # USGS_hits = model_summary[235, 14]
-    # USGS_misses = model_summary[235, 15]
-    # USGS_correct_rejections = model_summary[235, 16]
-    # USGS_false_alarms = model_summary[235, 17]
-    
-    # accuracy = ((hits + correct_rejections) / (hits + misses + correct_rejections + false_alarms)) *100
-    # accuracy <- as.integer(accuracy)
-    # accuracy <- round(accuracy, 0)
-    # USGS_accuracy = ((USGS_hits + USGS_correct_rejections) / (USGS_hits + USGS_misses + USGS_correct_rejections + USGS_false_alarms)) *100
-    # USGS_accuracy <- as.integer(USGS_accuracy)
-    # USGS_accuracy <- round(USGS_accuracy, 0)
-    
-    Model <- c("Your Model", "Your Model", "Your Model", "Your Model", "USGS Model","USGS Model","USGS Model","USGS Model")
-    result <- c("Hits", "Misses", "False_Alarms", "Correct_Rejections", "Hits", "Misses", "False_Alarms", "Correct_Rejections")
-    result_count <- unlist(c(hits, misses, false_alarms, correct_rejections, USGS_hits, USGS_misses, USGS_false_alarms, USGS_correct_rejections))
-    subset2 = data.frame(Model, result, result_count)
-    #subset2$result <- reorder(subset2$result, subset2$result_count, FUN=mean)
-  
-    output$graph1 <- renderPlot({ggplot(subset2, aes(x=result, y=result_count, fill=Model)) + geom_bar(position="dodge", stat = "identity")+
-      theme_bw() + 
-      theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
-      theme(axis.text.y = element_text(size=15, family = "Eras")) +
-      #ggtitle("Model Results") +
-      #theme(plot.title=element_text(size=20)) +
-      labs(y=NULL, x=NULL) +
-      scale_fill_brewer(palette="Paired") +
-      theme(legend.title=element_text(family="Eras")) +
-      guides(fill=guide_legend(title=NULL)) +
-      theme(legend.text=element_text(family="Eras"))
-      })
-    # output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
-    # output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
+    ##################################################################################################################
+    observeEvent(input$slider2, {
+      #bar graph for algorithm results:
+      #the slider is in percent, but the model summary data is in decimals, so convert the input to match:
+      slider_input <- reactive({ (input$slider2) / 100 })
+      
+      #reorder the model_summary dataframe so that "tpr" is ascending ("thresholds" breaks ties and is descending)
+      model_summary_user <- arrange(model_summary, tpr, desc(thresholds))
+      
+      #returns the index of the value closest to your input:
+      index_user <- findInterval(slider_input(), model_summary_user$tpr) 
+      
+      #use the input's row index to pull model results:
+      hits = model_summary_user[index_user, 10]
+      false_alarms = model_summary_user[index_user, 13]
+      
+      #______________________
+      
+      #reorder the model_summary dataframe so that "tprUSGS" is ascending ("thresholds" breaks ties and is descending)
+      model_summary_USGS <- arrange(model_summary, tprUSGS, desc(thresholds))
+      
+      #returns the index of the value closest to your input:
+      index_USGS <- findInterval(slider_input(), model_summary_USGS$tprUSGS) 
+      
+      USGS_hits = model_summary_USGS[index_USGS, 14]
+      USGS_false_alarms = model_summary_USGS[index_USGS, 17]
+      
+      Model <- c("Your Model", "Your Model", "USGS Model","USGS Model")
+      result <- c("Hits", "False_Alarms", "Hits", "False_Alarms")
+      result_count <- unlist(c(hits, false_alarms, USGS_hits, USGS_false_alarms))
+      subset2 = data.frame(Model, result, result_count)
 
+      #interactive verbiage for results 
+      cost <- round(((2000 * false_alarms) / hits), 2) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
+      totalcost <- (2000 * false_alarms) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
+      output$results_verbiage <- renderText({ paste("In order to achieve a", format(input$slider2, big.mark=",", trim=TRUE), "% hit rate, your model had to call", 
+                                                    format(false_alarms, big.mark=",", trim=TRUE), 
+                                                    "false alarms during the summer, costing taxpayers $", format(cost, big.mark=",", trim=TRUE), "per hit, or a total of $", 
+                                                    format(totalcost, big.mark=",", trim=TRUE), "over the course of the summer.") }) 
+      
+      output$graph1 <- renderPlot({ggplot(subset2, aes(x=result, y=result_count, fill=Model)) + geom_bar(position="dodge", stat = "identity")+
+          theme_bw() + 
+          theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
+          theme(axis.text.y = element_text(size=15, family = "Eras")) +
+          #ggtitle("Model Results") +
+          #theme(plot.title=element_text(size=20)) +
+          labs(y="Beach Days", x=NULL) +
+          scale_fill_brewer(palette="Paired") +
+          theme(legend.title=element_text(family="Eras")) +
+          theme(axis.title.y=element_text(size=15, family = "Eras")) +
+          guides(fill=guide_legend(title=NULL)) +
+          theme(legend.text=element_text(family="Eras"))
+      })
+      # output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
+      # output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
+    })
+    ################################################################################################################## 
+    
   })
+
+  
+  
+  
+  
   ##################
   #graph 2 (stacked bar graph):
   observeEvent(input$slider, {
@@ -705,8 +720,8 @@ server <- function(input, output,session) {
                             Target = "target", Value = "value", 
                             NodeID = "name",  colourScale = JS(ColourScale),
                             Nodesize = "size", #radiusCalculation = "d.nodesize", #radiusCalculation = " Math.sqrt(d.nodesize)+6",
-                            fontFamily = "Eras Light ITC", fontSize = 20, opacityNoHover = .99,
-                            linkDistance = 300, charge = -120, legend = FALSE, clickAction = NULL,
+                            fontFamily = "Arial", fontSize = 20, opacityNoHover = .99,
+                            linkDistance = 225, charge = -120, legend = FALSE, clickAction = NULL,
                             # width = 1500, height = 300,
                             Group = "group", opacity = 1, zoom = F, bounded = T)
   })
