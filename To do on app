@@ -3,16 +3,12 @@ To do
 Renel:
 1.	I need predictions for each individual beach as output to tie it to the map 
 2.	Record what people’s responses are for the algorithm
-3.	Change slider from threshold to FP (false alarms) rate (setting FP rate equal for both models) IN PERCENTAGE = false alarms / (Correct rejections + false alarms)
-4.	Change color of beaches on prediction map to a color scale explaining how well their model performed on that beach
-5.	Change prediction bar graph to be percentage and only include hits and false alarms
-  a.	Correct rejections + false alarms = good days. 
-  b.	Hits + misses = bad days.
-6.	Want to display the $ cost of a hit (cost of keeping people safe)
+3.	Change color of beaches on prediction map to a color scale explaining how well their model performed on that beach
+4.	Want to display the $ cost of a hit (cost of keeping people safe)
   a.	I need $ value for cost of a false alarm
   b.	Incorporate the cost of a test
-7. Re-group beaches based on correlations
-8. Fix issue with fonts not showing up on graphs. Callin, do you know an easy way to do this?
+5. Re-group beaches based on correlations
+6. Fix issue with fonts not showing up on graphs. Callin, do you know an easy way to do this?
 
 
 Callin:
