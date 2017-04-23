@@ -6,6 +6,7 @@ Renel:
 3.	Change color of beaches on prediction map to a color scale explaining how well their model performed on that beach
 4.  Re-group beaches based on correlations
 5.  Fix issue with fonts not showing up on graphs. Callin, do you know an easy way to do this?
+6.  Fix bug where any hit rate below 10% returns NA
 
 
 Callin:
