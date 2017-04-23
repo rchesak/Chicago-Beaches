@@ -490,11 +490,11 @@ ui <- fixedPage(
                                     ")),
            ###########################################################
            absolutePanel(
-             bottom = 65, right = 690, width = 325,
+             bottom = 15, right = 690, width = 325,
              draggable = TRUE,
              wellPanel(
-               tags$h5("Decide which beaches will be predictive, hit the Update button, and your chosen beaches will be entered into an algorithm.
-                       Give the algorithm ", tags$b("10 seconds"), " to run, and the resulting model predictions will populate for your model, and for 
+               tags$h5("Decide which beaches will be predictive of the others. 
+                       Give the algorithm 10 seconds to run, and the resulting model predictions will populate for your model, and for 
                        the USGS model. Can you predict better that the US Geological Survey?"),
                checkboxGroupInput("chosen_beaches", label = tags$h5("Select which beaches will be predictive:"), beach_options),
                actionButton(inputId = "go", label = "Update beaches (~10 sec)")
@@ -504,18 +504,18 @@ ui <- fixedPage(
            ##########################################################
            ###########################################################
            absolutePanel(
-             bottom = 20, right = -350, width = 325,
+             bottom = -20, right = -330, width = 325,
              draggable = TRUE,
              wellPanel(
-               tags$h5("After building your model with the beaches, move the slider bar below to optimize the model so that you can achieve the most hits per dollar of taxpayer money.", tags$br(), 
-                       "Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
-                       comes at a cost: false alarms which cost taxpayer money because no one buys tickets to go to the beach. This presents an optimization problem where you are not only 
+               tags$h5("Move the slider bar below to optimize the model. Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
+                       comes at a cost: false alarms which cost taxpayer money because no one buys tickets to go to the beach.",
+                       tags$br(), "This presents an optimization problem where you are not only 
                        trying to get the most hits, but also the most hits for the lowest cost to taxpayers."),
                sliderInput("slider2", label = h5("Hit rate:"), min = 5,
                            max = 100, value = 95, post = "%"
                ),
                tags$h5(htmlOutput("results_verbiage")),
-               tags$h4("Model Results:"),
+               tags$h5("Model Results:"),
                plotOutput("graph1", height="300px", width = "300px"),
                tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
                tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
@@ -524,7 +524,7 @@ ui <- fixedPage(
            ),
            ##########################################################
    
-           leafletOutput('mymap', width = 670, height = 780),
+           leafletOutput('mymap', width = 650, height = 700),
                conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                 tags$div("Loading...",id="loadmessage"))
     )#,
