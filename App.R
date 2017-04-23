@@ -16,7 +16,9 @@ library(plyr)
 library(shinythemes)
 library(networkD3)
 library(leaflet)
-library(scales)
+library(formattable)
+#library(scales)
+#library(DT)
 # library(extrafont)
 # font_import(paths = NULL, recursive = TRUE, prompt = FALSE,
 #             pattern = NULL)
@@ -428,15 +430,15 @@ ui <- fixedPage(
   
   tabPanel("Build a Model",
            fixedRow(
-             column(2, align="center",
+             column(2, align="center", offset=2,
                     tags$img(height = 110.1333,
                              width = 166.4,
                              src = "SmallerChicagoFlag.PNG")
              ),
-             column(3, align="center",
+             column(3, align="center", #offset=2,
                     tags$h1("Can You Predict Better?")
              ),
-             column(2, align="center",
+             column(2, align="center", #offset=2,
                     tags$img(height = 110.1333,
                              width = 166.4,
                              src = "SmallerChicagoFlag.PNG")
@@ -444,18 +446,33 @@ ui <- fixedPage(
            ),
   
            fixedRow(
-    column(8, offset=0,
-                tags$h5("Decide which beaches will be predictive, hit the Update button, and your chosen beaches will be entered into an algorithm.
-                       Give the algorithm ", tags$b("10 seconds"), " to run, and the resulting model predictions will populate for your model, and for 
-                       the USGS model. Can you predict better that the US Geological Survey?"),
-               tags$h5("After selecting beaches and hitting update, the interactive map that populates below will show you how your model did at 
-              each beach. The graph that populates below, on the right, will show you how well your model performed compared
-                       to the model used by the City of Chicago."), 
-               tags$h5("Move the slider bar on the right to adjust the hit rate, which is the percentage of unsafe beach days that the models will 
-                       catch. Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
-                       comes at a cost: false alarms which costs taxpayer money because no one buys tickets to go to the beach. This presents an optimization problem where you are not only 
-                       trying to get the most hits, but also the most hits for the lowest cost to taxpayers."),
-           tags$h3(textOutput("results_verbiage")),
+    # column(7, offset = 2,
+    #             tags$h5("Decide which beaches will be predictive, hit the Update button, and your chosen beaches will be entered into an algorithm.
+    #                    Give the algorithm ", tags$b("10 seconds"), " to run, and the resulting model predictions will populate for your model, and for 
+    #                    the USGS model. Can you predict better that the US Geological Survey?"),
+    #            tags$h5("After selecting beaches and hitting update, the interactive map that populates below will show you how your model did at 
+    #           each beach. The graph that populates below, on the right, will show you how well your model performed compared
+    #                    to the model used by the City of Chicago."), 
+    #            tags$h5("Move the slider bar on the right to adjust the hit rate, which is the percentage of unsafe beach days that the models will 
+    #                    catch. Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
+    #                    comes at a cost: false alarms which costs taxpayer money because no one buys tickets to go to the beach. This presents an optimization problem where you are not only 
+    #                    trying to get the most hits, but also the most hits for the lowest cost to taxpayers.")
+    # ),
+    # column(8, offset = 0, #div(style = "height:0px"),
+    #        ##################################################
+    #        wellPanel(
+    #          tags$h5("After building your model with the beaches, move the slider bar below to optimize the model so that you can achieve the most hits per dollar of taxpayer money."),
+    #          sliderInput("slider2", label = h5("Hit rate:"), min = 5, 
+    #                      max = 100, value = 95
+    #          ),
+    #          tags$h4(textOutput("results_verbiage")),
+    #          tags$h4("Model Results:"),
+    #          plotOutput("graph1"),
+    #          style = "padding: -45px;"
+    #        )
+    #        ###################################################
+    # ),
+    column(7, offset = 2,  div(style = "height:-400px"),
                tags$head(tags$style(type="text/css", "
              #loadmessage {
                                     position: fixed;
@@ -473,30 +490,48 @@ ui <- fixedPage(
                                     ")),
            ###########################################################
            absolutePanel(
-             bottom = 0, right = -375, width = 350,
+             bottom = 65, right = 690, width = 325,
              draggable = TRUE,
              wellPanel(
-               checkboxGroupInput("chosen_beaches", "Select which beaches will be predictive:", beach_options),
-               actionButton(inputId = "go", label = "Update beaches (~10 sec)"),
-               tags$h5("After building your model with the beaches, move the slider bar below to optimize the model so that you can achieve the most hits per dollar of taxpayer money."),
-               sliderInput("slider2", label = h5("Hit rate:"), min = 5, 
-                           max = 100, value = 95
-               ),
-               tags$h4("Model Results:"),
-               plotOutput("graph1")
+               tags$h5("Decide which beaches will be predictive, hit the Update button, and your chosen beaches will be entered into an algorithm.
+                       Give the algorithm ", tags$b("10 seconds"), " to run, and the resulting model predictions will populate for your model, and for 
+                       the USGS model. Can you predict better that the US Geological Survey?"),
+               checkboxGroupInput("chosen_beaches", label = tags$h5("Select which beaches will be predictive:"), beach_options),
+               actionButton(inputId = "go", label = "Update beaches (~10 sec)")
                ),
              style = "opacity: 0.92"
                ),
            ##########################################################
+           ###########################################################
+           absolutePanel(
+             bottom = 20, right = -350, width = 325,
+             draggable = TRUE,
+             wellPanel(
+               tags$h5("After building your model with the beaches, move the slider bar below to optimize the model so that you can achieve the most hits per dollar of taxpayer money.", tags$br(), 
+                       "Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
+                       comes at a cost: false alarms which cost taxpayer money because no one buys tickets to go to the beach. This presents an optimization problem where you are not only 
+                       trying to get the most hits, but also the most hits for the lowest cost to taxpayers."),
+               sliderInput("slider2", label = h5("Hit rate:"), min = 5,
+                           max = 100, value = 95, post = "%"
+               ),
+               tags$h5(htmlOutput("results_verbiage")),
+               tags$h4("Model Results:"),
+               plotOutput("graph1", height="300px", width = "300px"),
+               tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
+               tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
+             ),
+             style = "opacity: 0.92"
+           ),
+           ##########################################################
    
-           leafletOutput('mymap', width = 725, height = 900),
+           leafletOutput('mymap', width = 670, height = 780),
                conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                 tags$div("Loading...",id="loadmessage"))
-    ),
-    column(12, align="right",
-           tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
-           tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
-            )
+    )#,
+    # column(12, align="right",
+    #        tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
+    #        tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
+    #         )
            ),
     fixedRow(
              column(12, align="center",
@@ -601,12 +636,12 @@ server <- function(input, output,session) {
       subset2 = data.frame(Model, result, result_count)
 
       #interactive verbiage for results 
-      cost <- round(((2000 * false_alarms) / hits), 2) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
+      cost <- ((2000 * false_alarms) / hits) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
       totalcost <- (2000 * false_alarms) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
-      output$results_verbiage <- renderText({ paste("In order to achieve a", format(input$slider2, big.mark=",", trim=TRUE), "% hit rate, your model had to call", 
-                                                    format(false_alarms, big.mark=",", trim=TRUE), 
-                                                    "false alarms during the summer, costing taxpayers $", format(cost, big.mark=",", trim=TRUE), "per hit, or a total of $", 
-                                                    format(totalcost, big.mark=",", trim=TRUE), "over the course of the summer.") }) 
+      output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
+                                                    tags$b(format(false_alarms, big.mark=",", trim=TRUE)), 
+                                                    "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
+                                                    tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
       
       output$graph1 <- renderPlot({ggplot(subset2, aes(x=result, y=result_count, fill=Model)) + geom_bar(position="dodge", stat = "identity")+
           theme_bw() + 
@@ -619,8 +654,10 @@ server <- function(input, output,session) {
           theme(legend.title=element_text(family="Eras")) +
           theme(axis.title.y=element_text(size=15, family = "Eras")) +
           guides(fill=guide_legend(title=NULL)) +
-          theme(legend.text=element_text(family="Eras"))
-      })
+          theme(legend.text=element_text(family="Eras")) 
+      }
+      #, height = 200, width = 300
+      )
       # output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
       # output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
     })
