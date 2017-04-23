@@ -1,14 +1,11 @@
 To do
 
 Renel:
-1.	I need predictions for each individual beach as output to tie it to the map 
+1.	Tie Callin's updated map data and cost info into the app
 2.	Record what people’s responses are for the algorithm
 3.	Change color of beaches on prediction map to a color scale explaining how well their model performed on that beach
-4.	Want to display the $ cost of a hit (cost of keeping people safe)
-  a.	I need $ value for cost of a false alarm
-  b.	Incorporate the cost of a test
-5. Re-group beaches based on correlations
-6. Fix issue with fonts not showing up on graphs. Callin, do you know an easy way to do this?
+4.  Re-group beaches based on correlations
+5.  Fix issue with fonts not showing up on graphs. Callin, do you know an easy way to do this?
 
 
 Callin:
@@ -16,7 +13,9 @@ Callin:
 2.	Make sure the verbiage in each tab is accurate.
 3.	Fix error when selecting every beach for the algorithm.
 4.	Fix issue when you select no beaches
-5. Get Renel $ value for cost of a false alarm
-6. Get Renel $ value for cost of a test
-7. To make the algorithm run faster: since the output to the "Model Summary" is always the same for USGS, can we take those calculations
-out of commission and just let the graphs pull from a static text file for the USGS results?
+5.  Get Renel $ value for cost of a false alarm
+6.  Get Renel $ value for cost of a test
+7.  To make the algorithm run faster: since the output to the "Model Summary" is always the same for USGS, can we take those calculations
+    out of commission and just let the graphs pull from a static text file for the USGS results?
+8.  Why does the USGS model always have roughly double the number of false alarms as the user's model? Are we sure the algorithm is working
+    the way we intend it to?
