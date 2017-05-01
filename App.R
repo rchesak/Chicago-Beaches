@@ -43,10 +43,10 @@ predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Inten
                        "Barometric_Pressure", "Visibility", "Cloud_Cover")
 
 #load fonts for graphs:
-# windowsFonts(Arial=windowsFont("TT Arial"))
-# windowsFonts(Times=windowsFont("TT Times New Roman"))
-# windowsFonts(Eras=windowsFont("Eras Light ITC"))
-# windowsFonts(PR=windowsFont("Poor Richard"))
+windowsFonts(Arial=windowsFont("TT Arial"))
+windowsFonts(Times=windowsFont("TT Times New Roman"))
+windowsFonts(Eras=windowsFont("Eras Light ITC"))
+windowsFonts(PR=windowsFont("Poor Richard"))
 
 # Create a palette that maps factor levels to colors for the interactive map:
 #                          blue       red        green       pink       orange     purple
@@ -129,30 +129,30 @@ ui <- fixedPage(
              column(4,
                     wellPanel(tags$h5("The ", tags$strong("Map"), " tab describes the beach locations and relationships."),
                     tags$img(height = 238.015625,
-                             width = 326.03125,
+                             #width = 326.03125,
                              src = "Map1.png")),
                     wellPanel(tags$h5("The", tags$strong("Beach Days"), "tab allows you to see how the ", tags$i("E. coli"), " cutoff level affects the number 
                             of swimmable beach days in the summer."),
                     tags$img(height = 203.1061589,
-                             width = 281.77326289,
+                             #width = 281.77326289,
                              src = "BeachDays.PNG"))
                     ),
              column(4,
                     wellPanel(tags$h5("The ", tags$strong("Predictors"), "tab allows you to explore how different elements of the weather and environment
                             trend with ", tags$i("E. coli"), " levels."),
                     tags$img(height = 239.994,
-                             width = 286.39284,
+                             #width = 286.39284,
                              src = "Predictors.PNG"))
                     ),
              column(4,
                     wellPanel(tags$h5("The ", tags$strong("Build a Model"), "tab gives you the tools you need to build a model that predicts the ", tags$i("E. coli"), " 
                             levels at each beach, and see if you're as smart as you think you are."),
                     tags$img(height = 266.0989356,
-                             width = 308.3321,
+                             #width = 308.3321,
                              src = "Model.PNG")),
                     wellPanel(tags$h5("The ", tags$strong("Network"), "tab describes the relationships that help us predict the ", tags$i("E. coli"), "  levels."),
                     tags$img(height = 245.767189,
-                             width = 302.205778,
+                             #width = 302.205778,
                              src = "Network.PNG"))
                     )
            ),
@@ -478,8 +478,8 @@ ui <- fixedPage(
                          ),
                          tags$h5(htmlOutput("results_verbiage")),
                          tags$h5("Model Results:"),
-                         plotOutput("optimization_graph", height="150px", width = "425px"), 
-                         plotOutput("graph1", height="150px", width = "425px"),
+                         plotOutput("optimization_graph", height="150px"), #, width = "425px"), 
+                         plotOutput("graph1", height="150px"), #, width = "425px"),
                          tags$h6(tags$div(HTML(paste(tags$span(tags$b(style="color:green", "Hits:")), "Unsafe beach days caught by the model.", sep = " ")))),
                          tags$h6(tags$div(HTML(paste(tags$span(tags$b(style="color:red", "False Alarms:")), "Safe beach days incorrectly flagged as unsafe, based upon the model.", sep = " "))))
                          ),
@@ -659,7 +659,7 @@ server <- function(input, output,session) {
                                                     "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
                                                     tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
       # bar graph for model:
-      output$graph1 <- renderPlot({ggplot(subset2, aes(x=model, y=result_count, fill=result)) + 
+      output$graph1 <- renderPlot({ggplot(subset2, aes(x=Model, y=result_count, fill=result)) + 
           geom_bar(position="dodge", stat = "identity")+
           theme_bw() + 
           guides(fill=FALSE) +
@@ -682,7 +682,7 @@ server <- function(input, output,session) {
     
     })
     ################################################################################################################## 
-    } #this bracket is for the if statement
+    } #this bracket is for the 'else' statement
     
 
   })
@@ -712,7 +712,7 @@ server <- function(input, output,session) {
   newdata <- ddply(data16, "Client.ID", transform, 
                    percent_days = days / sum(days) * 100)
   
-
+  #stacked bar graph
   output$graph2 <- renderPlot({ggplot(newdata, aes(x=Client.ID, y=percent_days, fill=underthresh, alpha=.9)) + geom_bar(stat = "identity")+
     theme_bw() + 
     theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
