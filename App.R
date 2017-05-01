@@ -17,6 +17,7 @@ library(shinythemes)
 library(networkD3)
 library(leaflet)
 library(formattable)
+library(shinyBS)
 #library(scales)
 #library(DT)
 # library(extrafont)
@@ -430,15 +431,15 @@ ui <- fixedPage(
   
   tabPanel("Build a Model",
            fixedRow(
-             column(2, align="center", offset=2,
+             column(4, align="center",
                     tags$img(height = 110.1333,
                              width = 166.4,
                              src = "SmallerChicagoFlag.PNG")
              ),
-             column(3, align="center", #offset=2,
+             column(4, align="center",
                     tags$h1("Can You Predict Better?")
              ),
-             column(2, align="center", #offset=2,
+             column(4, align="center",
                     tags$img(height = 110.1333,
                              width = 166.4,
                              src = "SmallerChicagoFlag.PNG")
@@ -446,93 +447,48 @@ ui <- fixedPage(
            ),
   
            fixedRow(
-    # column(7, offset = 2,
-    #             tags$h5("Decide which beaches will be predictive, hit the Update button, and your chosen beaches will be entered into an algorithm.
-    #                    Give the algorithm ", tags$b("10 seconds"), " to run, and the resulting model predictions will populate for your model, and for 
-    #                    the USGS model. Can you predict better that the US Geological Survey?"),
-    #            tags$h5("After selecting beaches and hitting update, the interactive map that populates below will show you how your model did at 
-    #           each beach. The graph that populates below, on the right, will show you how well your model performed compared
-    #                    to the model used by the City of Chicago."), 
-    #            tags$h5("Move the slider bar on the right to adjust the hit rate, which is the percentage of unsafe beach days that the models will 
-    #                    catch. Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
-    #                    comes at a cost: false alarms which costs taxpayer money because no one buys tickets to go to the beach. This presents an optimization problem where you are not only 
-    #                    trying to get the most hits, but also the most hits for the lowest cost to taxpayers.")
-    # ),
-    # column(8, offset = 0, #div(style = "height:0px"),
-    #        ##################################################
-    #        wellPanel(
-    #          tags$h5("After building your model with the beaches, move the slider bar below to optimize the model so that you can achieve the most hits per dollar of taxpayer money."),
-    #          sliderInput("slider2", label = h5("Hit rate:"), min = 5, 
-    #                      max = 100, value = 95
-    #          ),
-    #          tags$h4(textOutput("results_verbiage")),
-    #          tags$h4("Model Results:"),
-    #          plotOutput("graph1"),
-    #          style = "padding: -45px;"
-    #        )
-    #        ###################################################
-    # ),
-    column(7, offset = 2,  div(style = "height:-400px"),
-               tags$head(tags$style(type="text/css", "
-             #loadmessage {
-                                    position: fixed;
-                                    top: 0px;
-                                    left: 0px;
-                                    width: 100%;
-                                    padding: 5px 0px 5px 0px;
-                                    text-align: center;
-                                    font-weight: bold;
-                                    font-size: 100%;
-                                    color: #000000;
-                                    background-color: #CCFF66;
-                                    z-index: 105;
-                                    }
-                                    ")),
-           ###########################################################
-           absolutePanel(
-             bottom = 15, right = 690, width = 325,
-             draggable = TRUE,
-             wellPanel(
-               tags$h5("Decide which beaches will be predictive of the others. 
-                       Give the algorithm 10 seconds to run, and the resulting model predictions will populate for your model, and for 
-                       the USGS model. Can you predict better that the US Geological Survey?"),
-               checkboxGroupInput("chosen_beaches", label = tags$h5("Select which beaches will be predictive:"), beach_options),
-               actionButton(inputId = "go", label = "Update beaches (~10 sec)")
-               ),
-             style = "opacity: 0.92"
-               ),
-           ##########################################################
-           ###########################################################
-           absolutePanel(
-             bottom = -20, right = -330, width = 325,
-             draggable = TRUE,
-             wellPanel(
-               tags$h5("Move the slider bar below to optimize the model. Remember, you want a high hit rate in order to catch all the bad days so that swimmers don't get sick. However, that 
-                       comes at a cost: false alarms which cost taxpayer money because no one buys tickets to go to the beach.",
-                       tags$br(), "This presents an optimization problem where you are not only 
-                       trying to get the most hits, but also the most hits for the lowest cost to taxpayers."),
-               sliderInput("slider2", label = h5("Hit rate:"), min = 5,
-                           max = 100, value = 95, post = "%"
-               ),
-               tags$h5(htmlOutput("results_verbiage")),
-               tags$h5("Model Results:"),
-               plotOutput("graph1", height="300px", width = "300px"),
-               tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
-               tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
-             ),
-             style = "opacity: 0.92"
+             column(7, 
+                    bsAlert("alert"),
+                    leafletOutput('mymap', width = 650, height = 850)
+                    ),
+
+              column(5,
+                     div(style = "height:-400px"),
+                         tags$head(tags$style(type="text/css", "
+                       #loadmessage {
+                                              position: fixed;
+                                              top: 0px;
+                                              left: 0px;
+                                              width: 100%;
+                                              padding: 5px 0px 5px 0px;
+                                              text-align: center;
+                                              font-weight: bold;
+                                              font-size: 100%;
+                                              color: #000000;
+                                              background-color: #CCFF66;
+                                              z-index: 105;
+                                              }
+                                              ")),
+                     ###########################################################
+                       wellPanel(
+                         actionButton(inputId = "go", label = "Update beaches (~10 sec)"),
+                         selectInput("chosen_beaches", label = tags$h5("Select which beaches will be predictive:"), beach_options, multiple=TRUE, selectize=TRUE),
+                         sliderInput("slider2", label = h5("Hit rate:"), min = 5,
+                                     max = 100, value = 95, post = "%"
+                         ),
+                         tags$h5(htmlOutput("results_verbiage")),
+                         tags$h5("Model Results:"),
+                         plotOutput("optimization_graph", height="150px", width = "425px"), 
+                         plotOutput("graph1", height="150px", width = "425px"),
+                         tags$h6(tags$div(HTML(paste(tags$span(tags$b(style="color:green", "Hits:")), "Unsafe beach days caught by the model.", sep = " ")))),
+                         tags$h6(tags$div(HTML(paste(tags$span(tags$b(style="color:red", "False Alarms:")), "Safe beach days incorrectly flagged as unsafe, based upon the model.", sep = " "))))
+                         ),
+                     #########################################################
+                         conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                          tags$div("Loading...",id="loadmessage"))
+              )
            ),
-           ##########################################################
-   
-           leafletOutput('mymap', width = 650, height = 700),
-               conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                tags$div("Loading...",id="loadmessage"))
-    )#,
-    # column(12, align="right",
-    #        tags$h6(tags$b("False Alarms:"), "Safe beach days incorrectly flagged as unsafe, based upon the model."), 
-    #        tags$h6(tags$b("Hits:"), "Unsafe beach days caught by the model.")
-    #         )
-           ),
+    
     fixedRow(
              column(12, align="center",
                     tags$h4("__________________________________________________________________________________________________________________________________________________")
@@ -571,7 +527,23 @@ server <- function(input, output,session) {
   ####################
   #graph 1 and interactive map:
   observeEvent(input$go, { #everything inside here is tied to the update button
-    #call the function given the input, and return the output as model_summary:
+    
+    #create an alert if they select 0 beaches:
+    if (length(input$chosen_beaches) == 0){
+      closeAlert(session, "exampleAlert")
+      createAlert(session, "alert", "exampleAlert", title = "Oops",
+                  content = "You must select at least one beach!", append = FALSE)
+    }
+    else if (length(input$chosen_beaches) == 20){
+      closeAlert(session, "exampleAlert")
+      createAlert(session, "alert", "exampleAlert", title = "Oops",
+                  content = "In order to use the predictive model, some beaches must be left out of the sample (so they can be predicted).", 
+                  append = FALSE)
+    }
+    
+    #call the function given the input (as long as they selected at least 1 beach), and return the output as model_summary:
+    else {
+    closeAlert(session, "exampleAlert")
     model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3) 
     
     #map:
@@ -603,8 +575,52 @@ server <- function(input, output,session) {
     
     output$mymap = renderLeaflet(map2)
     
+    ######################
+    #create data for optimization graph:
+    
+    #reorder the model_summary dataframe so that "tpr" is ascending ("thresholds" breaks ties and is descending)
+    model_summary_tpr <- arrange(model_summary, tpr, desc(thresholds))
+    
+    #get rid of duplicate tpr (hit rates)
+    model_summary_tpr = model_summary_tpr[!duplicated(model_summary_tpr$tpr),]
+    
+    #create the cost/hit of the false alarms:
+    model_summary_tpr$cost <- ((model_summary_tpr$fp *1500)/ model_summary_tpr$tp)
+    
+    #create the total cost of the false alarms:
+    model_summary_tpr$total_cost <- (model_summary_tpr$fp *1500)
+    
+    #convert hit rate to percent:
+    model_summary_tpr$tpr <- (model_summary_tpr$tpr *100)
+    
+    #create a copy for modification:
+    model_summary_tpr2 <- model_summary_tpr[, c(1, 2, 10, 13)]
+    names(model_summary_tpr2) <- c('thresholds', 'hit_rate', 'hits', 'false_alarms')
+    
+    #reshape the data for a 2-line graph:
+    library(reshape2)
+    model_summary_tpr2 <- melt(model_summary_tpr2, id.vars = c('thresholds', 'hit_rate'), variable.name = 'hit_or_falsealarm', value.name = 'beach_days')
+    
+    
     ##################################################################################################################
     observeEvent(input$slider2, {
+      #optimization graph:
+      output$optimization_graph <- renderPlot({
+        ggplot(model_summary_tpr2, aes(x=hit_rate, y=beach_days, group = hit_or_falsealarm, colour = hit_or_falsealarm)) + 
+          geom_line(size= .75) +
+          geom_vline(xintercept = input$slider2) +
+          scale_colour_manual(values=c("#229954", "#FF0000"), labels = c("Hits", "False Alarms")) +
+          theme_bw() +
+          labs(x = "Hit Rate", y = "Beach Days") +
+          guides(colour=guide_legend(title=NULL)) +
+          theme(axis.text.x= element_text(size=15, family = "Eras")) +
+          theme(axis.text.y = element_text(size=15, family = "Eras")) +
+          theme(axis.title.y=element_text(size=15, family = "Eras")) +
+          theme(axis.title.x=element_text(size=15, family = "Eras")) +
+          theme(legend.text=element_text(family="Eras", size=15)) +
+          theme(legend.position = c(0.25, 0.75))
+      })
+      
       #bar graph for algorithm results:
       #the slider is in percent, but the model summary data is in decimals, so convert the input to match:
       slider_input <- reactive({ (input$slider2) / 100 })
@@ -612,12 +628,12 @@ server <- function(input, output,session) {
       #reorder the model_summary dataframe so that "tpr" is ascending ("thresholds" breaks ties and is descending)
       model_summary_user <- arrange(model_summary, tpr, desc(thresholds))
       
-      #returns the index of the value closest to your input:
-      index_user <- findInterval(slider_input(), model_summary_user$tpr) 
+      #returns the index of the value closest to user input:
+      user_index <- findInterval(slider_input(), model_summary_user$tpr) 
       
       #use the input's row index to pull model results:
-      hits = model_summary_user[index_user, 10]
-      false_alarms = model_summary_user[index_user, 13]
+      hits = model_summary_user[user_index, 10]
+      false_alarms = model_summary_user[user_index, 13]
       
       #______________________
       
@@ -625,10 +641,10 @@ server <- function(input, output,session) {
       model_summary_USGS <- arrange(model_summary, tprUSGS, desc(thresholds))
       
       #returns the index of the value closest to your input:
-      index_USGS <- findInterval(slider_input(), model_summary_USGS$tprUSGS) 
+      user_index_USGS <- findInterval(slider_input(), model_summary_USGS$tprUSGS) 
       
-      USGS_hits = model_summary_USGS[index_USGS, 14]
-      USGS_false_alarms = model_summary_USGS[index_USGS, 17]
+      USGS_hits = model_summary_USGS[user_index_USGS, 14]
+      USGS_false_alarms = model_summary_USGS[user_index_USGS, 17]
       
       Model <- c("Your Model", "Your Model", "USGS Model","USGS Model")
       result <- c("Hits", "False_Alarms", "Hits", "False_Alarms")
@@ -636,33 +652,39 @@ server <- function(input, output,session) {
       subset2 = data.frame(Model, result, result_count)
 
       #interactive verbiage for results 
-      cost <- ((2000 * false_alarms) / hits) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
-      totalcost <- (2000 * false_alarms) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
+      totalcost <- (1500 * false_alarms) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
+      cost <- (totalcost / hits) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
       output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
                                                     tags$b(format(false_alarms, big.mark=",", trim=TRUE)), 
                                                     "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
                                                     tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
-      
-      output$graph1 <- renderPlot({ggplot(subset2, aes(x=result, y=result_count, fill=Model)) + geom_bar(position="dodge", stat = "identity")+
+      # bar graph for model:
+      output$graph1 <- renderPlot({ggplot(subset2, aes(x=model, y=result_count, fill=result)) + 
+          geom_bar(position="dodge", stat = "identity")+
           theme_bw() + 
-          theme(axis.text.x= element_text(angle=-30, hjust=0.05, vjust=1, size=15, family = "Eras")) +
+          guides(fill=FALSE) +
+          theme(axis.text.x= element_text(size=15, family = "Eras")) + #angle=-30, hjust=0.05, vjust=1,
           theme(axis.text.y = element_text(size=15, family = "Eras")) +
           #ggtitle("Model Results") +
           #theme(plot.title=element_text(size=20)) +
           labs(y="Beach Days", x=NULL) +
-          scale_fill_brewer(palette="Paired") +
-          theme(legend.title=element_text(family="Eras")) +
-          theme(axis.title.y=element_text(size=15, family = "Eras")) +
-          guides(fill=guide_legend(title=NULL)) +
-          theme(legend.text=element_text(family="Eras")) 
+          scale_fill_manual(values=c("#FF0000", "#229954"), labels = c("False Alarms", "Hits")) + 
+          #scale_fill_brewer(palette="Paired") +
+          #theme(legend.title=element_text(family="Eras")) +
+          theme(axis.title.y=element_text(size=15, family = "Eras")) 
+          #guides(fill=guide_legend(title=NULL)) +
+          #theme(legend.text=element_text(family="Eras")) 
+        
+
       }
       #, height = 200, width = 300
       )
-      # output$yaccuracy <- renderText({paste("Your Accuracy:", accuracy, "%")})
-      # output$oaccuracy <- renderText({paste("USGS Accuracy:", USGS_accuracy, "%")})
+    
     })
     ################################################################################################################## 
+    } #this bracket is for the if statement
     
+
   })
 
   
