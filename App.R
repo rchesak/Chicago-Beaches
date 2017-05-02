@@ -1,6 +1,6 @@
 #
 # This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
+# the 'Run App' button in Rstudio.
 #
 # Find out more about building applications with Shiny here:
 #
@@ -43,10 +43,10 @@ predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Inten
                        "Barometric_Pressure", "Visibility", "Cloud_Cover")
 
 #load fonts for graphs:
-windowsFonts(Arial=windowsFont("TT Arial"))
-windowsFonts(Times=windowsFont("TT Times New Roman"))
-windowsFonts(Eras=windowsFont("Eras Light ITC"))
-windowsFonts(PR=windowsFont("Poor Richard"))
+# windowsFonts(Arial=windowsFont("TT Arial"))
+# windowsFonts(Times=windowsFont("TT Times New Roman"))
+# windowsFonts(Eras=windowsFont("Eras Light ITC"))
+# windowsFonts(PR=windowsFont("Poor Richard"))
 
 # Create a palette that maps factor levels to colors for the interactive map:
 #                          blue       red        green       pink       orange     purple
@@ -584,11 +584,11 @@ server <- function(input, output,session) {
     #get rid of duplicate tpr (hit rates)
     model_summary_tpr = model_summary_tpr[!duplicated(model_summary_tpr$tpr),]
     
-    #create the cost/hit of the false alarms:
-    model_summary_tpr$cost <- ((model_summary_tpr$fp *1500)/ model_summary_tpr$tp)
-    
     #create the total cost of the false alarms:
-    model_summary_tpr$total_cost <- (model_summary_tpr$fp *1500)
+    #model_summary_tpr$total_cost <- ((model_summary_tpr$fp *1500) + (length(input$chosen_beaches) * 150 *100)) 
+    
+    #create the cost/hit of the false alarms:
+    #model_summary_tpr$cost <- (((model_summary_tpr$fp *1500) + (length(input$chosen_beaches) * 150 *100)) / model_summary_tpr$tp)
     
     #convert hit rate to percent:
     model_summary_tpr$tpr <- (model_summary_tpr$tpr *100)
@@ -652,8 +652,8 @@ server <- function(input, output,session) {
       subset2 = data.frame(Model, result, result_count)
 
       #interactive verbiage for results 
-      totalcost <- (1500 * false_alarms) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
-      cost <- (totalcost / hits) #COST OF A FALSE ALARM NEEDS TO BE UPDATED
+      totalcost <- ((false_alarms *1500) + (length(input$chosen_beaches) * 150 *100)) # $150 per test * 100 beach days
+      cost <- (totalcost / hits) 
       output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
                                                     tags$b(format(false_alarms, big.mark=",", trim=TRUE)), 
                                                     "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
