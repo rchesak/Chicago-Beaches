@@ -77,8 +77,6 @@ df_model <- df[, unlist(list(c("Escherichia.coli","Client.ID"),beaches_rename,
   threshBegin <- 1
   threshEnd <- 500
   
-  # change threshold for saving results into "predictions" data frame
-  thresh <- thresh
   
   # runs all modeling code
   source("30_Model.R", print.eval=TRUE, local = TRUE)
@@ -105,6 +103,7 @@ df_model <- df[, unlist(list(c("Escherichia.coli","Client.ID"),beaches_rename,
               tnUSGS = mean(tnUSGS),
               fpUSGS = mean(fpUSGS)
     )
-  return(model_summary)
+  return_list <- list(model_summary = model_summary,predictions = predictions)
+  return(return_list)
 }
 

@@ -82,6 +82,16 @@ content7 <- paste0("<strong>Beach: </strong>",
                    "7"
 )
 
+predicting <- function(predictions,thresh)
+{
+    predictions$misses<- ifelse(predictions$DNAModel.Prediction>thresh & predictions$Escherichia.coli<=235,1,0)
+    predictions$hits <- ifelse(predictions$DNAModel.Prediction>thresh &  predictions$Escherichia.coli > 235,1,0)
+    misses <- aggregate(predictions$misses,by=list(Beach = predictions$Client.ID), FUN =sum )
+    hits <- aggregate(predictions$hits,by=list(Beach = predictions$Client.ID), FUN =sum )
+    my_list <-  list(misses = misses, hits = hits)
+    return(my_list)
+}
+
 
 
 
@@ -544,7 +554,7 @@ server <- function(input, output,session) {
     #call the function given the input (as long as they selected at least 1 beach), and return the output as model_summary:
     else {
     closeAlert(session, "exampleAlert")
-    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3) 
+    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3)$model_summary 
     
     #map:
     # create a default web map 
