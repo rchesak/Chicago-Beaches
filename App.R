@@ -53,15 +53,6 @@ predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Inten
 factpal <- colorFactor(c("#0288D1", "#B71C1C",  "#229954", "#EC407A", "#F57C00", "#7B1FA2"), lng_lat_df$Group)
 
 #Create label content for interactive map:
-content2 <- paste(sep = "",
-                  lng_lat_df$Client.ID,
-                  ": You caught ",
-                  "12",
-                  " unsafe beach days, and you missed",
-                  "7",
-                  " unsafe beach days."
-)
-
 content5 <- paste(sep = "",
                   lng_lat_df$Client.ID,
                   " || ",
@@ -77,9 +68,11 @@ content6 <- paste0("<strong>Beach: </strong>",
 content7 <- paste0("<strong>Beach: </strong>", 
                    lng_lat_df$Client.ID, 
                    "<br><strong>Unsafe beach days you caught: </strong>", 
-                   "12",
+                   lng_lat_df$hits,
+                   "<br><strong>False Alarms you called: </strong>", 
+                   lng_lat_df$false_alarms,
                    "<br><strong>Unsafe beach days you missed: </strong>", 
-                   "7"
+                   lng_lat_df$misses
 )
 
 
@@ -547,6 +540,17 @@ server <- function(input, output,session) {
     model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3) 
     
     #map:
+    #function to color the beaches based on # of false alarms:
+    getColor <- function(lng_lat_df) {
+      sapply(lng_lat_df$false_alarms, function(false_alarms) {
+        if(false_alarms <= 20) {
+          "green"
+        } else if(false_alarms <= 40) {
+          "orange"
+        } else {
+          "red"
+        } })
+    }
     # create a default web map 
     map <- leaflet::leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
     #customize the map:
@@ -559,14 +563,14 @@ server <- function(input, output,session) {
       # add some circles:
       addCircles(
         ~Longitude, ~Latitude,
-        radius = ~AvgEcoli*3,
-        color = ~factpal(Group),
+        radius = ~false_alarms*5,  #NOTE: size of circle is based on number of false alarms now
+        color = getColor(lng_lat_df),
         #label = content2,
         #label = ~as.character(AvgEcoli),
         label = "Click me!",
         popup = content7,
         weight = 5
-      ) 
+      )
     # addPopups(
     #   ~Longitude, ~Latitude,
     #   content,
