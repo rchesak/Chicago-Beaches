@@ -65,27 +65,31 @@ content6 <- paste0("<strong>Beach: </strong>",
                    lng_lat_df$AvgEcoliLabel
 )
 
-content7 <- paste0("<strong>Beach: </strong>", 
-                   lng_lat_df$Client.ID, 
-                   "<br><strong>Unsafe beach days you caught: </strong>", 
-                   lng_lat_df$hits,
-                   "<br><strong>False Alarms you called: </strong>", 
-                   lng_lat_df$false_alarms,
-                   "<br><strong>Unsafe beach days you missed: </strong>", 
-                   lng_lat_df$misses
-)
 
-predicting <- function(predictions,thresh)
-{
-    predictions$misses<- ifelse(predictions$DNAModel.Prediction>thresh & predictions$Escherichia.coli<=235,1,0)
-    predictions$hits <- ifelse(predictions$DNAModel.Prediction>thresh &  predictions$Escherichia.coli > 235,1,0)
-    misses <- aggregate(predictions$misses,by=list(Beach = predictions$Client.ID), FUN =sum )
-    hits <- aggregate(predictions$hits,by=list(Beach = predictions$Client.ID), FUN =sum )
-    my_list <-  list(misses = misses, hits = hits)
-    return(my_list)
+
+#function for reshaping the individual beach data from the algorithm:
+reshape <- function(predictions,thresh)
+{ #make columns for individual beach outcomes shown in 'predictions' table outputed from the model:
+  predictions$false_alarms <- ifelse(predictions$DNAModel.Prediction>thresh & predictions$Escherichia.coli<=235,1,0)
+  predictions$hits <- ifelse(predictions$DNAModel.Prediction>thresh &  predictions$Escherichia.coli > 235,1,0)
+  predictions$misses <- ifelse(predictions$DNAModel.Prediction<=thresh &  predictions$Escherichia.coli > 235,1,0)
+  
+  #aggregate outcomes for each beach:
+  false_alarms <- aggregate(predictions$false_alarms, by=list(Beach = predictions$Client.ID), FUN =sum )
+  hits <- aggregate(predictions$hits, by=list(Beach = predictions$Client.ID), FUN =sum )
+  misses <- aggregate(predictions$misses, by=list(Beach = predictions$Client.ID), FUN =sum )
+  
+  #rename the aggregated colums (because the aggregate function just names it 'x'):
+  colnames(false_alarms) <- c("Beach", "false_alarms")
+  colnames(hits) <- c("Beach", "hits")
+  colnames(misses) <- c("Beach", "misses")
+  
+  #merge prediction results with the map dataframe:
+  lng_lat_df_results <- merge(lng_lat_df, false_alarms, by="Beach")
+  lng_lat_df_results <- merge(lng_lat_df_results, hits, by="Beach")
+  lng_lat_df_results <- merge(lng_lat_df_results, misses, by="Beach")
+  return(lng_lat_df_results)
 }
-
-
 
 
 
@@ -452,7 +456,9 @@ ui <- fixedPage(
            fixedRow(
              column(7, 
                     bsAlert("alert"),
-                    leafletOutput('mymap', width = 650, height = 850)
+                    leafletOutput('mymap', width = 650, height = 850)#,
+                    # dataTableOutput('mytable'),
+                    # downloadButton('downloadData', 'Download')
                     ),
 
               column(5,
@@ -547,22 +553,52 @@ server <- function(input, output,session) {
     #call the function given the input (as long as they selected at least 1 beach), and return the output as model_summary:
     else {
     closeAlert(session, "exampleAlert")
-    model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3)$model_summary 
+    return_list <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3)
+    model_summary <- return_list$model_summary
+    individual_beach_results <- return_list$predictions
+    # model_summary <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3)$model_summary 
+    # individual_beach_results <- beach_choose(beaches = as.character(input$chosen_beaches),thresh = as.numeric(235),num_of_folds = 3)$predictions
+
+    #use Callin's function to reshape the data for use in the map:
+    individual_beach_results_reshaped <- reshape(individual_beach_results, 235)
+
+    
+    # output$mytable = renderDataTable({
+    #   individual_beach_results
+    # })
+    # output$downloadData <- downloadHandler(
+    #   filename = function() { paste(input$dataset, '.csv', sep='') },
+    #   content = function(file) {
+    #     write.csv(individual_beach_results, file)
+    #   }
+    # )
     
     #map:
     #function to color the beaches based on # of false alarms:
-    getColor <- function(lng_lat_df) {
-      sapply(lng_lat_df$false_alarms, function(false_alarms) {
-        if(false_alarms <= 20) {
+    getColor <- function(enter_individual_beach_results_here) {
+      sapply(enter_individual_beach_results_here$false_alarms, function(false_alarms) {
+        if(false_alarms <= 5) {
           "green"
-        } else if(false_alarms <= 40) {
+        } else if(false_alarms <= 10) {
           "orange"
         } else {
           "red"
         } })
     }
+    
+    #Create label content for interactive map:
+    content7 <- paste0("<strong>Beach: </strong>", 
+                       individual_beach_results_reshaped$Beach, 
+                       "<br><strong>Unsafe beach days you caught: </strong>", 
+                       individual_beach_results_reshaped$hits,
+                       "<br><strong>Unsafe beach days you missed: </strong>", 
+                       individual_beach_results_reshaped$misses,
+                       "<br><strong>False Alarms you called: </strong>", 
+                       individual_beach_results_reshaped$false_alarms
+    )
+    
     # create a default web map 
-    map <- leaflet::leaflet(lng_lat_df) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
+    map <- leaflet::leaflet(individual_beach_results_reshaped) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
     #customize the map:
     map2 <- map %>%
       #use a third-party tile that looks better:
@@ -573,8 +609,8 @@ server <- function(input, output,session) {
       # add some circles:
       addCircles(
         ~Longitude, ~Latitude,
-        radius = ~false_alarms*5,  #NOTE: size of circle is based on number of false alarms now
-        color = getColor(lng_lat_df),
+        radius = ~((false_alarms+1)*20),  #NOTE: size of circle is based on number of false alarms now, and you add one to ensure every beach shows up
+        color = getColor(individual_beach_results_reshaped),
         #label = content2,
         #label = ~as.character(AvgEcoli),
         label = "Click me!",
