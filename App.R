@@ -681,8 +681,11 @@ server <- function(input, output,session) {
         #convert tprUSGS (USGS hit rate) to percent:
         model_summary_USGS$tprUSGS = ((model_summary_USGS$tprUSGS)*100)
         
-        #returns the index of the value closest to your input:
+        #returns the index of the hit rate closest to and lower than user input. if there isn't a lower hit rate, it will crash
         user_index_USGS <- findInterval(slider_input(), model_summary_USGS$tprUSGS) 
+        
+        #fix issue where a low hit rate crashes the app:
+        if (user_index_USGS == 0){user_index_USGS = 1}
         
         USGS_hits = model_summary_USGS[user_index_USGS, 14]
         USGS_false_alarms = model_summary_USGS[user_index_USGS, 17]
