@@ -788,7 +788,7 @@ server <- function(input, output,session) {
             geom_vline(xintercept = input$slider_FA) + #****THIS IS THE VARIABLE PART OF THE GRAPH (everything else is static)
             scale_colour_manual(values=c("#229954", "#FF0000"), labels = c("Hits", "False Alarms")) +
             theme_bw() +
-            labs(x = "Hit Rate", y = "Beach Days") +
+            labs(x = "False Alarm Rate", y = "Beach Days") +
             guides(colour=guide_legend(title=NULL)) +
             theme(axis.text.x= element_text(size=15, family = "Eras")) +
             theme(axis.text.y = element_text(size=15, family = "Eras")) +
@@ -811,6 +811,7 @@ server <- function(input, output,session) {
         #use the input's row index to pull model results:
         HITS = model_summary_fpr[user_index, 10]
         FALSE_ALARMS = model_summary_fpr[user_index, 13]
+        MISSES = model_summary_fpr[user_index, 11]
         threshold_for_map = model_summary_fpr[user_index, 1]
         
         #______________________
@@ -821,14 +822,16 @@ server <- function(input, output,session) {
           output$results_verbiage <- renderText({ paste("With a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
                                                         "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
-                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
+                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer. You missed",
+                                                        tags$b(format(MISSES, big.mark=",", trim=TRUE)), "unsafe beach days, putting Chicagoans at risk.") }) 
         }
         if (HITS ==0){
           totalcost <- (length(input$chosen_beaches) * 150 *100) # $150 per test * 100 beach days in the summer
-          output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$sliderFA / 100), digits=0)), "false alarm rate, your model had to call", 
+          output$results_verbiage <- renderText({ paste("with a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
                                                         "false alarms during the summer, while achieving no hits and costing taxpayers total of",  
-                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer for all the tests run.") }) 
+                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer for all the tests run. You missed",
+                                                        tags$b(format(MISSES, big.mark=",", trim=TRUE)), "unsafe beach days, putting Chicagoans at risk.") }) 
         }
         
         ##### MAP:
