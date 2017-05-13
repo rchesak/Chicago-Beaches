@@ -490,7 +490,7 @@ tabPanel("Build a Model",
                   wellPanel(
                     actionButton(inputId = "go", label = "Update beaches (~10 sec)"),
                     selectInput("chosen_beaches", label = tags$h5("Select which beaches will be predictive:"), beach_options, multiple=TRUE, selectize=TRUE),
-                    sliderInput("slider2", label = h5("Hit rate:"), min = 5,
+                    sliderInput("slider2", label = h5("Hit rate:"), min = 1,
                                 max = 100, value = 95, post = "%"
                     ),
                     tags$h5(htmlOutput("results_verbiage")),
@@ -615,8 +615,11 @@ server <- function(input, output,session) {
         ######### massage data for use in map and grouped bar graph:
         slider_input <- reactive({ (input$slider2) })
         
-        #returns the index of the value closest to user input:
+        #returns the index of the hit rate closest to and lower than user input. if there isn't a lower hit rate, it will crash
         user_index <- findInterval(slider_input(), model_summary_tpr$tpr) 
+        
+        #fix issue where a low hit rate crashes the app:
+        if (user_index == 0){user_index = 1}
         
         #use the input's row index to pull model results:
         HITS = model_summary_tpr[user_index, 10]
