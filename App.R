@@ -813,6 +813,7 @@ server <- function(input, output,session) {
         FALSE_ALARMS = model_summary_fpr[user_index, 13]
         MISSES = model_summary_fpr[user_index, 11]
         threshold_for_map = model_summary_fpr[user_index, 1]
+        HIT_RATE = model_summary_fpr[user_index, 2]
         
         #______________________
         #interactive verbiage for results 
@@ -822,7 +823,8 @@ server <- function(input, output,session) {
           output$results_verbiage <- renderText({ paste("With a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
                                                         "false alarm(s) during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
-                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer. You missed",
+                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer. With the corresponding",
+                                                        tags$b(percent((HIT_RATE), digits=0)), " hit rate, you missed",
                                                         tags$b(format(MISSES, big.mark=",", trim=TRUE)), "unsafe beach days, putting Chicagoans at risk.") }) 
         }
         if (HITS ==0){
