@@ -713,14 +713,14 @@ server <- function(input, output,session) {
         cost <- (totalcost / HITS) 
         output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
                                                       tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
-                                                      "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
+                                                      "false alarm(s) during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
                                                       tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
         }
         if (HITS ==0){
           totalcost <- (length(input$chosen_beaches) * 150 *100) # $150 per test * 100 beach days in the summer
           output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
-                                                        "false alarms during the summer, while achieving no hits and costing taxpayers total of",  
+                                                        "false alarm(s) during the summer, while achieving no hits and costing taxpayers total of",  
                                                         tags$b(currency(totalcost, digits=0)), "over the course of the summer for all the tests run.") }) 
         }
         ###### grouped bar graph for model:
@@ -821,15 +821,15 @@ server <- function(input, output,session) {
           cost <- (totalcost / HITS) 
           output$results_verbiage <- renderText({ paste("With a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
-                                                        "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
+                                                        "false alarm(s) during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
                                                         tags$b(currency(totalcost, digits=0)), "over the course of the summer. You missed",
                                                         tags$b(format(MISSES, big.mark=",", trim=TRUE)), "unsafe beach days, putting Chicagoans at risk.") }) 
         }
         if (HITS ==0){
           totalcost <- (length(input$chosen_beaches) * 150 *100) # $150 per test * 100 beach days in the summer
-          output$results_verbiage <- renderText({ paste("with a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
+          output$results_verbiage <- renderText({ paste("With a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
-                                                        "false alarms during the summer, while achieving no hits and costing taxpayers total of",  
+                                                        "false alarm(s) during the summer, while achieving no hits and costing taxpayers total of",  
                                                         tags$b(currency(totalcost, digits=0)), "over the course of the summer for all the tests run. You missed",
                                                         tags$b(format(MISSES, big.mark=",", trim=TRUE)), "unsafe beach days, putting Chicagoans at risk.") }) 
         }
