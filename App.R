@@ -488,11 +488,10 @@ tabPanel("Build a Model",
                                        ")),
                   ###########################################################
                   wellPanel(
+                    uiOutput("Rate"),
+                    uiOutput("Box2"),
                     actionButton(inputId = "go", label = "Update beaches (~10 sec)"),
                     selectInput("chosen_beaches", label = tags$h5("Select which beaches will be predictive:"), beach_options, multiple=TRUE, selectize=TRUE),
-                    sliderInput("slider2", label = h5("Hit rate:"), min = 1,
-                                max = 100, value = 95, post = "%"
-                    ),
                     tags$h5(htmlOutput("results_verbiage")),
                     tags$h5("Model Results:"),
                     plotOutput("optimization_graph", height="150px"), #, width = "425px"), 
@@ -543,7 +542,17 @@ server <- function(input, output,session) {
   
   ####################
   #graph 1 and interactive map:
-  observeEvent(input$go, { #everything inside here is tied to the update button
+  output$Rate = renderUI(selectInput("rate",h5("What are you interested in?"),c("Hit Rate", "False Alarm Rate"),"False Alarm Rate"))
+  output$Box2 = renderUI(
+    if(input$rate == "Hit Rate") {sliderInput("slider2", label = NULL, min = 1,
+                      max = 100, value = 95, post = "%")
+    }
+    else if(input$rate == "False Alarm Rate") {sliderInput("slider_FA", label = NULL, min = 1,
+                                                   max = 10, value = 5, step= 0.2, post = "%")
+    }
+  )
+
+  observeEvent(input$go, { #everything inside here is tied to the update button ******************************************************
     
     #create an alert if they select 0 beaches:
     if (length(input$chosen_beaches) == 0){
@@ -569,9 +578,12 @@ server <- function(input, output,session) {
       #save the output:
       model_summary <- return_list$model_summary
       individual_beach_results <- return_list$predictions
-    
       
-      ######################
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
+  observeEvent(input$rate, {   
+      
+      #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Hit Rate Input $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    if(input$rate == "Hit Rate") {
       #create data for optimization graph (this is static after they hit the "update" button; no need to tie it to the slider):
       
       #reorder the model_summary dataframe so that "tpr" is ascending ("thresholds" breaks ties and is descending)
@@ -592,7 +604,7 @@ server <- function(input, output,session) {
       
       
       ##################################################################################################################
-      # EVERYTHING HERE UPDATES WHEN THE SLIDER CHANGES:
+      # EVERYTHING HERE UPDATES WHEN THE HIT RATE SLIDER CHANGES:
       observeEvent(input$slider2, { 
         #optimization graph:
         output$optimization_graph <- renderPlot({
@@ -612,7 +624,7 @@ server <- function(input, output,session) {
         })
         
         
-        ######### massage data for use in map and grouped bar graph:
+        ######### massage data for use in map and verbiage:
         slider_input <- reactive({ (input$slider2) })
         
         #returns the index of the hit rate closest to and lower than user input. if there isn't a lower hit rate, it will crash
@@ -706,7 +718,6 @@ server <- function(input, output,session) {
         }
         if (HITS ==0){
           totalcost <- (length(input$chosen_beaches) * 150 *100) # $150 per test * 100 beach days in the summer
-          cost <- (totalcost / HITS) 
           output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
                                                         tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
                                                         "false alarms during the summer, while achieving no hits and costing taxpayers total of",  
@@ -734,12 +745,188 @@ server <- function(input, output,session) {
         #, height = 200, width = 300
         )
         
-      })
+      }) #this is for the end of the 'observeEvent' for slider2
+    } #this is for the if statement for when they want to look at hit rate
+      
+      #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ False Alarm Rate Input $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+      
+    else if(input$rate == "False Alarm Rate") {
+      
+      #create data for false alarm rate optimization graph (this is static after they hit the "update" button; no need to tie it to the slider):
+      #reorder the model_summary dataframe so that "fpr" is ascending ("thresholds" breaks ties and is descending)
+      model_summary_fpr <- arrange(model_summary, fpr, desc(thresholds))
+      head(model_summary_fpr)
+      
+      #get rid of duplicate fpr (false alarm rates)
+      model_summary_fpr = model_summary_fpr[!duplicated(model_summary_fpr$fpr),]
+      head(model_summary_fpr)
+      model_summary_fpr
+      
+      #convert false alarm rate to percent:
+      model_summary_fpr$fpr <- (model_summary_fpr$fpr *100)
+      head(model_summary_fpr)
+      
+      #create a copy for modification:
+      model_summary_fpr2 <- model_summary_fpr[, c(1, 3, 10, 13)]
+      names(model_summary_fpr2) <- c('thresholds', 'false_alarm_rate', 'hits', 'false_alarms')
+      head(model_summary_fpr2)
+      
+      #reshape the data for a 2-line graph:
+      library(reshape2)
+      model_summary_fpr2 <- melt(model_summary_fpr2, id.vars = c('thresholds', 'false_alarm_rate'), variable.name = 'hit_or_falsealarm', value.name = 'beach_days')
+      head(model_summary_fpr2)
+      
+      ##################################################################################################################
+      # EVERYTHING HERE UPDATES WHEN THE FALSE ALARM RATE SLIDER CHANGES:
+      observeEvent(input$slider_FA, { 
+        #make a new dataset that excludes rows where false alarm rate > 10:
+        model_summary_fpr3 <- model_summary_fpr2[!rowSums(model_summary_fpr2[2] > 10),]
+        #optimization graph:
+        output$optimization_graph <- renderPlot({
+          ggplot(model_summary_fpr3, aes(x=false_alarm_rate, y=beach_days, group = hit_or_falsealarm, colour = hit_or_falsealarm)) + 
+            geom_line(size= .75) +
+            geom_vline(xintercept = input$slider_FA) + #****THIS IS THE VARIABLE PART OF THE GRAPH (everything else is static)
+            scale_colour_manual(values=c("#229954", "#FF0000"), labels = c("Hits", "False Alarms")) +
+            theme_bw() +
+            labs(x = "Hit Rate", y = "Beach Days") +
+            guides(colour=guide_legend(title=NULL)) +
+            theme(axis.text.x= element_text(size=15, family = "Eras")) +
+            theme(axis.text.y = element_text(size=15, family = "Eras")) +
+            theme(axis.title.y=element_text(size=15, family = "Eras")) +
+            theme(axis.title.x=element_text(size=15, family = "Eras")) +
+            theme(legend.text=element_text(family="Eras", size=15)) +
+            theme(legend.position = c(0.25, 0.75))
+        })
+        
+        
+        ######### massage data for use in map and verbiage:
+        slider_inputFA <- reactive({ (input$slider_FA) })
+        
+        #returns the index of the false alarm rate closest to and lower than user input. if there isn't a lower false alarm rate, it will crash
+        user_index <- findInterval(slider_inputFA(), model_summary_fpr$fpr) 
+        
+        #fix issue where a low false alarm rate crashes the app:
+        if (user_index == 0){user_index = 1}
+        
+        #use the input's row index to pull model results:
+        HITS = model_summary_fpr[user_index, 10]
+        FALSE_ALARMS = model_summary_fpr[user_index, 13]
+        threshold_for_map = model_summary_fpr[user_index, 1]
+        
+        #______________________
+        #interactive verbiage for results 
+        if (HITS !=0){
+          totalcost <- ((FALSE_ALARMS *1500) + (length(input$chosen_beaches) * 150 *100)) # $150 per test * 100 beach days in the summer
+          cost <- (totalcost / HITS) 
+          output$results_verbiage <- renderText({ paste("With a", tags$b(percent((input$slider_FA / 100), digits=0)), "false alarm rate, your model had to call", 
+                                                        tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
+                                                        "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
+                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
+        }
+        if (HITS ==0){
+          totalcost <- (length(input$chosen_beaches) * 150 *100) # $150 per test * 100 beach days in the summer
+          output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$sliderFA / 100), digits=0)), "false alarm rate, your model had to call", 
+                                                        tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
+                                                        "false alarms during the summer, while achieving no hits and costing taxpayers total of",  
+                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer for all the tests run.") }) 
+        }
+        
+        ##### MAP:
+        #use Callin's function to reshape the data for use in the map:
+        individual_beach_results_reshaped <- my_reshape(individual_beach_results, as.numeric(threshold_for_map)) #**threshold varies based on the threshold tied to the hit rate chosen in the slider
+        
+        #Create label content for interactive map:
+        content7 <- paste0("<strong>Beach: </strong>", #** these values change when the hit rate changes (because of the corresponding threshold change)
+                           individual_beach_results_reshaped$Beach, 
+                           "<br><strong>False Alarms you called: </strong>", 
+                           individual_beach_results_reshaped$false_alarms,
+                           "<br><strong>Unsafe beach days you caught: </strong>", 
+                           individual_beach_results_reshaped$hits,
+                           "<br><strong>Unsafe beach days you missed: </strong>", 
+                           individual_beach_results_reshaped$misses
+                           
+        )
+        
+        # create a default web map 
+        map <- leaflet::leaflet(individual_beach_results_reshaped) %>% addTiles() #the add tiles argument breaks the map into tiles so it's not so hard to hold it in memory
+        #customize the map:
+        map2 <- map %>%
+          #use a third-party tile that looks better:
+          #addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
+          addProviderTiles(providers$Esri.WorldTopoMap) %>%
+          # map location:
+          setView(lng=-87.6, lat = 41.85, zoom = 11) %>%                        
+          # add some circles:
+          addCircles(
+            ~Longitude, ~Latitude,
+            radius = ~(false_alarms*20),  #NOTE: size of circle is based on number of false alarms now, and only PREDICTED (non-selected beaches) will show up
+            color = getColor(individual_beach_results_reshaped),
+            #label = content2,
+            #label = ~as.character(AvgEcoli),
+            label = "Click me!",
+            popup = content7,
+            weight = 5
+          )
+        # addPopups(
+        #   ~Longitude, ~Latitude,
+        #   content,
+        #   options = popupOptions(closeButton = TRUE)
+        # )
+        
+        output$mymap = renderLeaflet(map2)
+        
+        
+        ##### reshape USGS data for grouped bar graph:
+        #reorder the model_summary dataframe so that "fprUSGS" is ascending ("thresholds" breaks ties and is descending)
+        model_summary_USGS <- arrange(model_summary, fprUSGS, desc(thresholds))
+        
+        #convert fprUSGS (USGS false alarm rate) to percent:
+        model_summary_USGS$fprUSGS = ((model_summary_USGS$fprUSGS)*100)
+        
+        #returns the index of the false alarm rate closest to and lower than user input. if there isn't a lower hit rate, it will crash
+        user_index_USGS <- findInterval(slider_inputFA(), model_summary_USGS$fprUSGS) 
+        
+        #fix issue where a low hit rate crashes the app:
+        if (user_index_USGS == 0){user_index_USGS = 1}
+        
+        USGS_hits = model_summary_USGS[user_index_USGS, 14]
+        USGS_false_alarms = model_summary_USGS[user_index_USGS, 17]
+        
+        Model <- c("Your Model", "Your Model", "USGS Model","USGS Model")
+        result <- c("Hits", "False_Alarms", "Hits", "False_Alarms")
+        result_count <- unlist(c(HITS, FALSE_ALARMS, USGS_hits, USGS_false_alarms))
+        subset2 = data.frame(Model, result, result_count)
+        
+        ###### grouped bar graph for model:
+        output$graph1 <- renderPlot({ggplot(subset2, aes(x=Model, y=result_count, fill=result)) + 
+            geom_bar(position="dodge", stat = "identity")+
+            theme_bw() + 
+            guides(fill=FALSE) +
+            theme(axis.text.x= element_text(size=15, family = "Eras")) + #angle=-30, hjust=0.05, vjust=1,
+            theme(axis.text.y = element_text(size=15, family = "Eras")) +
+            #ggtitle("Model Results") +
+            #theme(plot.title=element_text(size=20)) +
+            labs(y="Beach Days", x=NULL) +
+            scale_fill_manual(values=c("#FF0000", "#229954"), labels = c("False Alarms", "Hits")) + 
+            #scale_fill_brewer(palette="Paired") +
+            #theme(legend.title=element_text(family="Eras")) +
+            theme(axis.title.y=element_text(size=15, family = "Eras")) 
+          #guides(fill=guide_legend(title=NULL)) +
+          #theme(legend.text=element_text(family="Eras")) 
+          
+          
+        }
+        #, height = 200, width = 300
+        )
+        
+      }) #these brackets are for the observeEvent sliderFA
       ################################################################################################################## 
-    } #this bracket is for the 'else' statement
+    } #this bracket is for if they selected False Alarm Rate
+  }) #these brackets are for the observeEvent input$rate
+ } #this bracket is for the 'else' statement when they have selected beaches properly
+
     
-    
-  })
+  }) #these brackets are for the observeEvent go button
   
   
   
