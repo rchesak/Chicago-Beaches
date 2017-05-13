@@ -43,7 +43,7 @@ beach_options = c("12th","31st","57th", "63rd", "Albion", "Calumet", "Foster", "
 predictor_options <- c("Water_Temperature", "Dew_Point", "Humidity", "Rain_Intensity", "Wind_Speed",
                        "Barometric_Pressure", "Visibility", "Cloud_Cover")
 
-#load fonts for graphs:
+#load fonts for graphs: [NOTE: this causes the app to crash on Shiny's server]
 # windowsFonts(Arial=windowsFont("TT Arial"))
 # windowsFonts(Times=windowsFont("TT Times New Roman"))
 # windowsFonts(Eras=windowsFont("Eras Light ITC"))
@@ -80,7 +80,7 @@ getColor <- function(individual_beach_results_reshaped) {
 
 #define function for reshaping the individual beach data from the algorithm:
 my_reshape <- function(predictions,thresh)
-{ #make columns for individual beach outcomes shown in 'predictions' table outputed from the model:
+{ #make binary columns for individual beach outcomes shown in 'predictions' table outputed from the model:
   predictions$false_alarms <- ifelse(predictions$DNAModel.Prediction>thresh & predictions$Escherichia.coli<=235,1,0)
   predictions$hits <- ifelse(predictions$DNAModel.Prediction>thresh &  predictions$Escherichia.coli > 235,1,0)
   predictions$misses <- ifelse(predictions$DNAModel.Prediction<=thresh &  predictions$Escherichia.coli > 235,1,0)
@@ -90,12 +90,12 @@ my_reshape <- function(predictions,thresh)
   hits <- aggregate(predictions$hits, by=list(Beach = predictions$Client.ID), FUN =sum )
   misses <- aggregate(predictions$misses, by=list(Beach = predictions$Client.ID), FUN =sum )
   
-  #rename the aggregated colums (because the aggregate function just names it 'x'):
+  #rename the aggregated columns (because the aggregate function just names it 'x'):
   colnames(false_alarms) <- c("Beach", "false_alarms")
   colnames(hits) <- c("Beach", "hits")
   colnames(misses) <- c("Beach", "misses")
   
-  #merge prediction results with the map dataframe:
+  #merge prediction results with the map dataframe. note that non-predicted beaches will get lost in the merge (which is what we want).
   lng_lat_df_results <- merge(lng_lat_df, false_alarms, by="Beach")
   lng_lat_df_results <- merge(lng_lat_df_results, hits, by="Beach")
   lng_lat_df_results <- merge(lng_lat_df_results, misses, by="Beach")
@@ -696,12 +696,22 @@ server <- function(input, output,session) {
         subset2 = data.frame(Model, result, result_count)
         
         #interactive verbiage for results 
-        totalcost <- ((FALSE_ALARMS *1500) + (length(input$chosen_beaches) * 150 *100)) # $150 per test * 100 beach days
+        if (HITS !=0){
+        totalcost <- ((FALSE_ALARMS *1500) + (length(input$chosen_beaches) * 150 *100)) # $150 per test * 100 beach days in the summer
         cost <- (totalcost / HITS) 
         output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
                                                       tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
                                                       "false alarms during the summer, costing taxpayers", tags$b(currency(cost, digits=0)), "per hit, or a total of",  
                                                       tags$b(currency(totalcost, digits=0)), "over the course of the summer.") }) 
+        }
+        if (HITS ==0){
+          totalcost <- (length(input$chosen_beaches) * 150 *100) # $150 per test * 100 beach days in the summer
+          cost <- (totalcost / HITS) 
+          output$results_verbiage <- renderText({ paste("In order to achieve a", tags$b(percent((input$slider2 / 100), digits=0)), "hit rate, your model had to call", 
+                                                        tags$b(format(FALSE_ALARMS, big.mark=",", trim=TRUE)), 
+                                                        "false alarms during the summer, while achieving no hits and costing taxpayers total of",  
+                                                        tags$b(currency(totalcost, digits=0)), "over the course of the summer for all the tests run.") }) 
+        }
         ###### grouped bar graph for model:
         output$graph1 <- renderPlot({ggplot(subset2, aes(x=Model, y=result_count, fill=result)) + 
             geom_bar(position="dodge", stat = "identity")+
