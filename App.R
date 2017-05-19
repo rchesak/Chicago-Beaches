@@ -61,7 +61,7 @@ content5 <- paste(sep = "",
 )
 
 content6 <- paste0("<strong>Beach: </strong>", 
-                   lng_lat_df$Client.ID, 
+                   lng_lat_df$Beach, 
                    "<br><strong>Avg E. coli level: </strong>", 
                    lng_lat_df$AvgEcoliLabel
 )
