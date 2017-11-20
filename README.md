@@ -4,4 +4,6 @@ https://rchesak.shinyapps.io/e-coli-beach-predictions/
 
 The above app can also be found on the City of Chicago's website: http://chicago.github.io/clear-water/challenge/index.html
 
+The main repository for the Clear Water project can be found at https://github.com/Chicago/clear-water/ 
+
 The algorithm used in this app was built by the City of Chicago's Department of Innovation and Technology (@cityofchicago), and it's incorporation into this app would not have been possible without the help of my friend and former city intern, Callin Osborn (@CallinOsborn).
