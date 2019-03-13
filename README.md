@@ -6,6 +6,6 @@ The above app can also be found on the City of Chicago's website: http://chicago
 
 Main repository for the Clear Water project: https://github.com/Chicago/clear-water/ 
 
-Publication: https://www.sciencedirect.com/science/article/pii/S2589914718300161?via%3Dihub 
+Publication: https://doi.org/10.1016/j.wroa.2018.100016
 
 The algorithm used in this app was built by the City of Chicago's Department of Innovation and Technology (@cityofchicago), and it's incorporation into this app would not have been possible without the help of my friend and former city intern, Callin Osborn (@CallinOsborn).
