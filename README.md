@@ -8,4 +8,4 @@ Main repository for the Clear Water project: https://github.com/Chicago/clear-wa
 
 Publication: https://doi.org/10.1016/j.wroa.2018.100016
 
-The algorithm used in this app was built by the City of Chicago's Department of Innovation and Technology (@cityofchicago), and it's incorporation into this app would not have been possible without the help of my friend and former city intern, Callin Osborn (@CallinOsborn).
+The model used in this app was built by the City of Chicago's Department of Innovation and Technology (@cityofchicago), and it's incorporation into this app would not have been possible without the help of my friend and former city intern, Callin Osborn (@CallinOsborn).
